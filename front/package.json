@@ -1,0 +1,31 @@
+{
+  "name": "tracker-shops",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.9.0",
+    "@emotion/styled": "^11.8.1",
+    "@mui/icons-material": "^5.6.2",
+    "@mui/material": "^5.6.4",
+    "@mui/styles": "^5.6.2",
+    "@reduxjs/toolkit": "^1.8.1",
+    "axios": "^0.27.2",
+    "dotenv": "^16.0.0",
+    "moment": "^2.29.3",
+    "mongodb": "^4.5.0",
+    "next": "12.1.6",
+    "react": "18.1.0",
+    "react-dom": "18.1.0",
+    "react-redux": "^8.0.1"
+  },
+  "devDependencies": {
+    "eslint": "8.15.0",
+    "eslint-config-next": "12.1.6"
+  }
+}
