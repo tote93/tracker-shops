@@ -5,8 +5,7 @@ export const getFormattedPrice = (price) => {
 };
 
 export const getMaxSizeText = (str, numChars) => {
-  if (str.length >= 70) return str.substring(0, numChars) + "...";
-  else return str;
+  return str.substring(0, numChars) + "...";
 };
 
 export const checkIfAccountNotExists = (host) => {
@@ -113,4 +112,8 @@ export const getFirstUppercase = (str) => {
 
 export const getDiffPrices = (p1, p2) => {
   return (p1 - p2).toFixed(2);
+};
+
+export const countNumProducts = (array, id) => {
+  return array.filter((e) => e._id === id).length;
 };

@@ -7,7 +7,8 @@ import { theme } from "../lib/theme";
 import "../styles/app.css";
 import { Provider } from "react-redux";
 import store from "../app/store";
-import Header from "../components/Header";
+import GlobalNotifications from "../components/GlobalNotifications";
+import Layout from "../components/Layout";
 
 /*import GlobalNotifications from "../components/GlobalNotifications";
 import Layout from "../components/Layout";
@@ -21,12 +22,12 @@ export default function MyApp(props) {
           <Head>
             <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
           </Head>
-
-          <CssBaseline />
-
-          <Component {...pageProps} />
-          {/* <LoadingModal /> */}
-          {/* <GlobalNotifications /> */}
+          <Layout>
+            <CssBaseline />
+            <Component {...pageProps} />
+            {/* <LoadingModal /> */}
+            <GlobalNotifications />
+          </Layout>
         </React.Fragment>{" "}
       </Provider>
     </ThemeProvider>

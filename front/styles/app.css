@@ -8,6 +8,9 @@
 }
 .notification-container {
   width: fit-content !important;
+  height: 95%;
+  bottom: 0 !important;
+  top: auto !important;
 }
 .selected_path {
   border-bottom: 2px solid #fff;

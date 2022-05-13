@@ -32,8 +32,6 @@
   white-space: nowrap;
   align-items: center;
   display: flex;
-  margin-left: 1.5rem;
-  margin-right: 1.5rem;
 }
 .container__actions > div > p:nth-child(2):hover {
   cursor: pointer;

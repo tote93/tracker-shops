@@ -1,0 +1,38 @@
+.featuredProducts {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  width: 100%;
+  overflow-y: scroll;
+}
+.featuredProducts__list {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-direction: column;
+  overflow: hidden;
+  width: 100%;
+}
+.userProduct {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+}
+.featuredProductsContainer {
+  display: flex;
+  padding: 1rem;
+  align-items: flex-start;
+  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+  overflow-x: hidden;
+}
+.featuredProducts__title {
+  text-align: left;
+}
+.featuredProducts::-webkit-scrollbar {
+  display: none;
+}

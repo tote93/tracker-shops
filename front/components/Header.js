@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styles from "../styles/Header.module.css";
 import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,7 +9,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import SettingsIcon from "@mui/icons-material/Settings";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import { Divider, IconButton, Typography } from "@mui/material";
+import { Divider, FormControl, FormHelperText, IconButton, Select, InputLabel, Typography } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -21,16 +21,30 @@ import IosShareIcon from "@mui/icons-material/IosShare";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import EuroIcon from "@mui/icons-material/Euro";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import { setEstimatePriceType } from "../features/user/userSlice";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 const Header = () => {
   const router = useRouter();
   const dispatch = useDispatch();
-  const estimate = useSelector((state) => state.common.estimateInfo);
-  console.log(estimate, "--");
+  const estimate = useSelector((state) => state.user.estimateInfo);
+  const [estimateName, setEstimateName] = React.useState(estimate.name);
+  const [estimateTotalPrice, setEstimateTotalPrice] = React.useState(estimate.totalPrice || 0);
+  const [openEstimateDialog, setOpenEstimateDialog] = React.useState(false);
+  const handleOpenEstimateDialog = () => setOpenEstimateDialog(true);
+  const handleCloseEstimateDialog = () => setOpenEstimateDialog(false);
+  /* Handle time frame */
+  const [openTimeFrame, setOpenTimeFrame] = React.useState(false);
+  const handleOpenTimeFrame = () => setOpenTimeFrame(true);
+  const handleCloseTimeFrame = () => setOpenTimeFrame(false);
+  const [timeFrame, setTimeFrame] = React.useState("month");
+
   const handleRedirect = (e, href) => {
     e.preventDefault();
     router.push(href);
   };
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [typeSelected, setTypeSelected] = React.useState("Mensual");
   const openControls = Boolean(anchorEl);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -39,10 +53,22 @@ const Header = () => {
     setAnchorEl(null);
   };
 
-  const [estimateName, setEstimateName] = React.useState("Mi lista");
-  const [open, setOpen] = React.useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const dispatchEstimateName = () => {
+    handleCloseEstimateDialog();
+    dispatch(setEstimateName(estimateName));
+  };
+  const validateTimeFrame = () => {
+    if (timeFrame !== estimate.type) {
+      dispatch(setEstimatePriceType(timeFrame));
+      getTypePayment();
+    }
+    handleCloseTimeFrame();
+  };
+  const getTypePayment = () => {
+    if (timeFrame === "month") setTypeSelected("Mensual");
+    else if (timeFrame === "triMonth") setTypeSelected("Trimestral");
+    else if (timeFrame === "year") setTypeSelected("Anual");
+  };
   return (
     <>
       <header className={styles.navbarHeader}>
@@ -51,7 +77,7 @@ const Header = () => {
             <Typography component="h1" variant="h5">
               {estimateName}
             </Typography>
-            <IconButton onClick={handleOpen} style={{ color: "#fff" }} aria-label="Editar nombre" component="span">
+            <IconButton onClick={handleOpenEstimateDialog} style={{ color: "#ffff" }} aria-label="Editar nombre" component="span">
               <EditIcon className={styles.icon} fontSize="small" style={{ margin: "0 10px" }} />
             </IconButton>
             <div className={styles.actions__shop}>
@@ -93,26 +119,39 @@ const Header = () => {
             </div>
           </div>
           <div className={styles.container__actions}>
-            {estimate.totalPrice || 0}
-            <EuroIcon />
+            <Typography component="h2" variant="h5" style={{ display: "flex", alignItems: "center" }}>
+              Precio {typeSelected}: {estimate?.totalPrice || 0}
+              <EuroIcon />
+            </Typography>
+          </div>
+          <div className={styles.container__actions}>
+            <IconButton onClick={handleOpenTimeFrame} style={{ color: "#fff" }} aria-label="Editar nombre" component="span">
+              <CalendarMonthIcon className={styles.icon} fontSize="small" style={{ margin: "0 10px" }} />
+            </IconButton>
           </div>
         </div>
         {/* Bottom Nav */}
         <div className={styles.actionbars}>
-          <div style={{ display: "flex", alignItems: "center" }} id="addProduct">
+          <div style={{ display: "flex", alignItems: "center" }} id="myProducts">
+            <div className={styles.link} onClick={(e) => handleRedirect(e, "/misProductos")}>
+              <ShoppingCartIcon className="icon" />
+              <p className={styles.item}>Mi Lista</p>
+            </div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center" }} id="categories">
             <div className={styles.link} onClick={(e) => handleRedirect(e, "/addProduct")}>
               <StoreIcon className="icon" />
               <p className={styles.item}>Categorias</p>
             </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center" }} id="addProduct">
+          <div style={{ display: "flex", alignItems: "center" }} id="favorites">
             <div className={styles.link} onClick={(e) => handleRedirect(e, "/addProduct")}>
               <FavoriteIcon className="icon" />
               <p className={styles.item}>Mis Favoritos</p>
             </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center" }} id="addProduct">
-            <div className={styles.link} onClick={(e) => handleRedirect(e, "/addProduct")}>
+          <div style={{ display: "flex", alignItems: "center" }} id="search">
+            <div className={styles.link} onClick={(e) => handleRedirect(e, "/search")}>
               <SearchIcon className="icon" />
               <p className={styles.item}>Buscar</p>
             </div>
@@ -125,7 +164,8 @@ const Header = () => {
           </div> */}
         </div>
       </header>
-      <Dialog open={open} onClose={handleClose}>
+      {/* Dialog Estimate Name */}
+      <Dialog open={openEstimateDialog} onClose={handleCloseEstimateDialog}>
         <DialogTitle style={{ width: "300px", display: "flex", justifyContent: "center", background: "#3F72AE", color: "#fff" }}>Edita tu lista de la compra</DialogTitle>
         <DialogContent>
           <TextField
@@ -140,10 +180,38 @@ const Header = () => {
           />
         </DialogContent>
         <DialogActions style={{ display: "flex", justifyContent: "space-between", padding: "15px 20px" }}>
-          <Button disabled={estimateName.length == 0} variant="contained" color="error" size="small" onClick={handleClose}>
+          <Button disabled={estimateName.length == 0} variant="contained" color="error" size="small" onClick={handleCloseEstimateDialog}>
             Cancelar
           </Button>
-          <Button disabled={estimateName.length == 0} variant="contained" color="info" size="small" onClick={handleClose}>
+          <Button disabled={estimateName.length == 0} variant="contained" color="info" size="small" onClick={dispatchEstimateName}>
+            Aceptar
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* Dialog TimeFrame */}
+      <Dialog open={openTimeFrame} onClose={handleCloseTimeFrame}>
+        <DialogTitle style={{ width: "350px", display: "flex", justifyContent: "center", background: "#3F72AE", color: "#fff", marginBottom: "20px" }}>Rango de Tiempo</DialogTitle>
+        <DialogContent>
+          <InputLabel id="demo-simple-select-helper-label">Selecciona rango de tiempo</InputLabel>
+          <Select
+            style={{ width: "100%" }}
+            labelId="demo-simple-select-helper-label"
+            id="demo-simple-select-helper"
+            value={timeFrame}
+            label="Rango de tiempo"
+            onChange={(evt) => setTimeFrame(evt.target.value)}
+          >
+            <MenuItem value={"month"}>Mensual</MenuItem>
+            <MenuItem value={"triMonth"}>Trimestral</MenuItem>
+            <MenuItem value={"year"}>Anual</MenuItem>
+          </Select>
+          <FormHelperText>El precio será recalculado automáticamente.</FormHelperText>
+        </DialogContent>
+        <DialogActions style={{ display: "flex", justifyContent: "space-between", padding: "15px 20px" }}>
+          <Button disabled={estimateName.length == 0} variant="contained" color="error" size="small" onClick={handleCloseTimeFrame}>
+            Cancelar
+          </Button>
+          <Button disabled={estimateName.length == 0} variant="contained" color="info" size="small" onClick={validateTimeFrame}>
             Aceptar
           </Button>
         </DialogActions>

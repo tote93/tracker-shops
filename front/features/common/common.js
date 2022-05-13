@@ -6,7 +6,6 @@ export const common = createSlice({
     loading: false,
     featuredTags: [],
     notification: { duration: 1000 },
-    estimateInfo: { totalPrice: 0, items: [] },
   },
   reducers: {
     setNotification: (state, action) => {

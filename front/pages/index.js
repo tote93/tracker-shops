@@ -7,11 +7,7 @@ import styles from "../styles/Home.module.css";
 export default function Home({ categories, products }) {
   return (
     <div className={styles.container}>
-      <Header />
-      {/* {categories.message.map((cat) => {
-        return <p key={cat._id}> {cat.name}</p>;
-      })} */}
-      <ProductList dataList={products.message} />
+      <ProductList dataList={products.message} count={products.count} />
     </div>
   );
 }
@@ -23,9 +19,10 @@ export async function getServerSideProps() {
   // extract the data
   let categories = await response.json();
 
-  /*  let responseProd = await fetch(`${dev ? DEV_URL : DEV_URL}/api/products`); */
+  let responseProd = await fetch(`${dev ? DEV_URL : DEV_URL}/api/products`);
   // extract the data
-  let products = { message: [] }; //await responseProd.json();
+  //let products = { message: [] }; //await responseProd.json();
+  let products = await responseProd.json();
 
   // Pass data to the page via props
   return { props: { categories, products } };
