@@ -4,35 +4,28 @@ const chrome = require("selenium-webdriver/chrome");
 const fs = require("fs");
 const { formatPrice, getCurrency } = require("./utils");
 const { createUpdateProducts } = require("./database/database_actions");
+
 const CARREFOUR_SECTIONS = [
-  /*   { url: "/supermercado/the-market/cat20002/c", tag: ["Supermercado"], name: "super1" },
-  { url: "/supermercado/la-despensa/cat20001/c", tag: ["Supermercado"], name: "super2" },
+  /* { url: "/supermercado/the-market/cat20002/c", tag: ["Supermercado"], name: "super1" }, */
+  /*   { url: "/supermercado/la-despensa/cat20001/c", tag: ["Supermercado"], name: "super2" },
   { url: "/supermercado/drinks/cat20003/c", tag: ["Bebidas"], name: "bebidas" },
-  { url: "/supermercado/baby/cat20006/c", tag: ["Infantil"], name: "infantil" },
+
   { url: "/supermercado/cleaning-and-household/cat20005/c", tag: ["Limpieza"], name: "limpieza" },
-  { url: "/supermercado/perfumery-and-hygiene/cat20004/c", tag: ["Perfumería", "Higiene"], name: "perf_higiene" },
-  { url: "/supermercado/pets/cat20007/c", tag: ["Mascotas"], name: "pets1" },
-  { url: "/supermercado/para-pharmacy/cat20008/c", tag: ["Parafarmacia"], name: "paraFarm" },
+  { url: "/supermercado/perfumery-and-hygiene/cat20004/c", tag: ["Perfumería", "Higiene"], name: "perf_higiene" }, */
+
+  /*   { url: "/supermercado/para-pharmacy/cat20008/c", tag: ["Parafarmacia"], name: "paraFarm" },
   { url: "/casa-hogar", tag: ["Hogar"] }, */
-  /* { url: "/cuidado-personal-y-salud", tag: ["Higiene", "Salud"], name:"salud1" }, */
-  { url: "/mascotas", tag: ["Mascotas"], name: "pets2" },
+  { url: "/cuidado-personal-y-salud", tag: ["Higiene", "Salud"], name: "salud1" },
   { url: "/health-and-beauty/cat15966350/c", tag: ["Salud", "Belleza"], name: "salud" },
-  /* { url: "/bodega", tag: "Bodega", next: true }, */
-  /* { url: "/ofertas-en-electronica-textil-y-bazar/cat10017263/c", tag: ["Electrónica Textil y Bazar"] }, */
-  /* { url: "/juguetes", tag: ["Juguetes"] }, */
   { url: "/pequenos-productores/cat4510248/c", tag: ["Supermercado"], name: "super3" },
-  /* { url: "/moda", tag: "Moda", next: true }, */
-  /*   { url: "/bebe", tag: ["Infantil"] },
-  { url: "/jardin", tag: ["Jardin"] }, */
-  /*   { url: "/informatica", tag: ["Informática"], name: "inform" },
-  { url: "/electronica", tag: ["Electrónica"], name: "electro" }, */
-  /*   { url: "/electrodomesticos", tag: ["Electrodomésticos"] },
-  { url: "/gaming", tag: ["Gaming"] },
-  { url: "/libros-discos-video-papeleria-y-regalo/cat8440103/c", tag: ["Libros", "Papeleria"] },
-  { url: "/deporte-ocio", tag: ["Deportes", "Ocio"] },
-  { url: "/bricolaje-y-automovil", tag: ["Bricolaje", "Automovil"] },
-  { url: "/tienda-de-oportunidades/cat10350029/c", tag: ["Oportunidades"] },
-   */
+  { url: "/bebe", tag: ["Infantil"] },
+  /* ------- */
+  /*  { url: "/supermercado/baby/cat20006/c", tag: ["Infantil"], name: "infantil" }, */
+  /* { url: "/ofertas-en-electronica-textil-y-bazar/cat10017263/c", tag: ["Electrónica Textil y Bazar"] }, */
+  /*  { url: "/mascotas", tag: ["Mascotas"], name: "pets2" }, */
+  /* { url: "/juguetes", tag: ["Juguetes"] }, */
+  /*{ url: "/jardin", tag: ["Jardin"] }, */
+  /* { url: "/supermercado/pets/cat20007/c", tag: ["Mascotas"], name: "pets1" }, */
 ];
 let productArray = [];
 let driver = null;
@@ -81,7 +74,7 @@ async function scrappeCarrefour() {
           console.log(`Finished ${baseURL}${section.url}?offset=${currCount} ---`, productArray.length);
           currCount = currCount + 24;
         }
-        exportToFile(section.name);
+        //exportToFile(section.name);
         await createUpdateProducts(productArray);
       } else {
         console.log("Not found product list on ", section.tag);

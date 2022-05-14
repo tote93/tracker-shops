@@ -62,9 +62,9 @@ const createUpdateProducts = async (list) => {
     const result = await ProductModel.findOne({ link: product.link });
     if (result) {
       if (getDateDiffHours(result.updatedAt, currDate) >= 6) {
-        let prodDetails = new ProductModel({
-          ...result,
+        let prodDetails = {
           updatedAt: currDate,
+          price: product.price,
           priceHistory: [
             ...result.priceHistory,
             {
@@ -72,10 +72,10 @@ const createUpdateProducts = async (list) => {
               dateTime: currDate,
             },
           ],
-        });
+        };
         ProductModel.findOneAndUpdate({ link: product.link }, prodDetails, options, (error, result) => {
           if (error) {
-            console.log("Existing document", prodDetails);
+            console.log("Existing document", prodDetails, error.message);
             return;
           }
         });
@@ -94,6 +94,7 @@ const createUpdateProducts = async (list) => {
       });
       ProductModel.findOneAndUpdate({ link: product.link }, prodDetails, options, (error, result) => {
         if (error) {
+          console.log("NO Existing document", prodDetails, error.message);
           return;
         }
       });
