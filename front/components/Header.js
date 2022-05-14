@@ -29,7 +29,6 @@ const Header = () => {
   const dispatch = useDispatch();
   const estimate = useSelector((state) => state.user.estimateInfo);
   const [estimateName, setEstimateName] = React.useState(estimate.name);
-  const [estimateTotalPrice, setEstimateTotalPrice] = React.useState(estimate.totalPrice || 0);
   const [openEstimateDialog, setOpenEstimateDialog] = React.useState(false);
   const handleOpenEstimateDialog = () => setOpenEstimateDialog(true);
   const handleCloseEstimateDialog = () => setOpenEstimateDialog(false);
@@ -37,14 +36,14 @@ const Header = () => {
   const [openTimeFrame, setOpenTimeFrame] = React.useState(false);
   const handleOpenTimeFrame = () => setOpenTimeFrame(true);
   const handleCloseTimeFrame = () => setOpenTimeFrame(false);
-  const [timeFrame, setTimeFrame] = React.useState("month");
+  const [timeFrame, setTimeFrame] = React.useState(estimate.type);
 
   const handleRedirect = (e, href) => {
     e.preventDefault();
     router.push(href);
   };
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const [typeSelected, setTypeSelected] = React.useState("Mensual");
+  const [typeSelected, setTypeSelected] = React.useState(null);
   const openControls = Boolean(anchorEl);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -52,6 +51,9 @@ const Header = () => {
   const handleCloseControls = () => {
     setAnchorEl(null);
   };
+  useEffect(() => {
+    getTypePayment(estimate.type);
+  }, []);
 
   const dispatchEstimateName = () => {
     handleCloseEstimateDialog();
@@ -64,10 +66,11 @@ const Header = () => {
     }
     handleCloseTimeFrame();
   };
-  const getTypePayment = () => {
-    if (timeFrame === "month") setTypeSelected("Mensual");
-    else if (timeFrame === "triMonth") setTypeSelected("Trimestral");
-    else if (timeFrame === "year") setTypeSelected("Anual");
+  const getTypePayment = (selectTimeFrame = timeFrame) => {
+    if (selectTimeFrame === "month") setTypeSelected("Mensual");
+    else if (selectTimeFrame === "week") setTypeSelected("Semanal");
+    else if (selectTimeFrame === "triMonth") setTypeSelected("Trimestral");
+    else if (selectTimeFrame === "year") setTypeSelected("Anual");
   };
   return (
     <>
@@ -139,13 +142,13 @@ const Header = () => {
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "center" }} id="categories">
-            <div className={styles.link} onClick={(e) => handleRedirect(e, "/addProduct")}>
+            <div className={styles.link} onClick={(e) => handleRedirect(e, "/")}>
               <StoreIcon className="icon" />
               <p className={styles.item}>Categorias</p>
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "center" }} id="favorites">
-            <div className={styles.link} onClick={(e) => handleRedirect(e, "/addProduct")}>
+            <div className={styles.link} onClick={(e) => handleRedirect(e, "/")}>
               <FavoriteIcon className="icon" />
               <p className={styles.item}>Mis Favoritos</p>
             </div>
@@ -201,6 +204,7 @@ const Header = () => {
             label="Rango de tiempo"
             onChange={(evt) => setTimeFrame(evt.target.value)}
           >
+            <MenuItem value={"week"}>Semanal</MenuItem>
             <MenuItem value={"month"}>Mensual</MenuItem>
             <MenuItem value={"triMonth"}>Trimestral</MenuItem>
             <MenuItem value={"year"}>Anual</MenuItem>

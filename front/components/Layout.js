@@ -31,7 +31,7 @@ const Layout = ({ children }) => {
   }, [router]);
   React.useEffect(() => {
     // Perform localStorage action
-    //router.push("/")
+    //router.push("/categories");
   }, []);
   return (
     <div className="content">

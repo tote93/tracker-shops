@@ -30,8 +30,9 @@ export default function Product({ product }) {
   };
 
   const addProductToBasket = () => {
+    let updateProductQty = { ...product, qty: 1 };
     try {
-      dispatch(addNewProduct(product));
+      dispatch(addNewProduct(updateProductQty));
       dispatch(setNotification({ severity: "success", title: `Añadido ${getMaxSizeText(componentProduct.title, 20)} a ${estimate.name}.`, duration: 2000 }));
     } catch (error) {
       dispatch(setNotification({ severity: "error", title: `Error ${error.message}.` }));

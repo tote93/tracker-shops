@@ -1,0 +1,67 @@
+.root {
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+}
+.listHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.listHeaderData {
+  flex: 0.5;
+}
+.listHeaderInfo {
+  flex: 0.5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  flex-wrap: wrap;
+}
+.listHeaderGraph {
+  flex: 0.5;
+  background-color: red;
+}
+
+.listHeaderDates {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  flex-wrap: wrap;
+}
+.listHeaderDateEstimate {
+  margin: 10px 0;
+}
+.listHeaderDateCurrent {
+  margin: 10px 0;
+}
+
+.productContent {
+  border: 1px solid black;
+  display: flex;
+  border-radius: 5px;
+  margin: 2px 0;
+  align-items: center;
+  justify-content: space-between;
+}
+.productImg {
+  height: 100px;
+  width: 100px;
+  flex: 0.1;
+}
+.productOptions {
+  display: flex;
+  align-items: center;
+  flex: 0.7;
+  justify-content: space-between;
+}
+.productDetails {
+  margin: 0 10px;
+}
+.rowTable {
+  font-weight: 700;
+}

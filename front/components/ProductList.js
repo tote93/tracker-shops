@@ -8,12 +8,12 @@ const PAGINATION_NUMBER = 10;
 function ProductList({ dataList, count }) {
   const [paginationCount, setPaginationCount] = useState(PAGINATION_NUMBER);
   const [page, setPage] = React.useState(1);
-  const [filteredFeatured, setFilteredFeatured] = useState(dataList);
+  const [filteredFeatured, setFilteredFeatured] = useState(dataList || []);
   const handlePaginate = (event, value) => {
     setPage(value);
   };
   const paginate = () => {
-    return filteredFeatured.slice((page - 1) * PAGINATION_NUMBER, page * PAGINATION_NUMBER);
+    return filteredFeatured.length ? filteredFeatured.slice((page - 1) * PAGINATION_NUMBER, page * PAGINATION_NUMBER) : [];
   };
   useEffect(() => {
     setFilteredFeatured(dataList);

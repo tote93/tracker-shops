@@ -1,0 +1,122 @@
+[
+  {
+    "_id": "6277c8097ea49129ec2dfbe6",
+    "name": "Supermercado",
+    "__v": 0
+  },
+  {
+    "_id": "6277c8097ea49129ec2dfbe9",
+    "name": "Bebidas",
+    "__v": 0
+  },
+  {
+    "_id": "6277c8097ea49129ec2dfbeb",
+    "name": "Bebé",
+    "__v": 0
+  },
+  {
+    "_id": "6277c8097ea49129ec2dfbed",
+    "name": "Limpieza",
+    "__v": 0
+  },
+  {
+    "_id": "6277c8097ea49129ec2dfbef",
+    "name": "Perfumería",
+    "__v": 0
+  },
+  {
+    "_id": "6277c8097ea49129ec2dfbf1",
+    "name": "Higiene",
+    "__v": 0
+  },
+  {
+    "_id": "6277c8097ea49129ec2dfbf3",
+    "name": "Mascotas",
+    "__v": 0
+  },
+  {
+    "_id": "6277c8097ea49129ec2dfbf5",
+    "name": "Parafarmacia",
+    "__v": 0
+  },
+  {
+    "_id": "6277c8097ea49129ec2dfbf7",
+    "name": "Jardin",
+    "__v": 0
+  },
+  {
+    "_id": "6277c8097ea49129ec2dfbf9",
+    "name": "Informática",
+    "__v": 0
+  },
+  {
+    "_id": "6277c8097ea49129ec2dfbfb",
+    "name": "Electrónica",
+    "__v": 0
+  },
+  {
+    "_id": "6277c8097ea49129ec2dfbfd",
+    "name": "Electrodomésticos",
+    "__v": 0
+  },
+  {
+    "_id": "6277c8097ea49129ec2dfbff",
+    "name": "Salud",
+    "__v": 0
+  },
+  {
+    "_id": "6277c8097ea49129ec2dfc01",
+    "name": "Gaming",
+    "__v": 0
+  },
+  {
+    "_id": "6277c8097ea49129ec2dfc03",
+    "name": "Hogar",
+    "__v": 0
+  },
+  {
+    "_id": "6277c8097ea49129ec2dfc05",
+    "name": "Libros",
+    "__v": 0
+  },
+  {
+    "_id": "6277c8097ea49129ec2dfc07",
+    "name": "Papeleria",
+    "__v": 0
+  },
+  {
+    "_id": "6277c8097ea49129ec2dfc09",
+    "name": "Deportes",
+    "__v": 0
+  },
+  {
+    "_id": "6277c8097ea49129ec2dfc0b",
+    "name": "Ocio",
+    "__v": 0
+  },
+  {
+    "_id": "6277c8097ea49129ec2dfc0d",
+    "name": "Bricolaje",
+    "__v": 0
+  },
+  {
+    "_id": "6277c8097ea49129ec2dfc0f",
+    "name": "Motor",
+    "__v": 0
+  },
+  {
+    "_id": "6277c8097ea49129ec2dfc11",
+    "name": "Juguetes",
+    "__v": 0
+  },
+  {
+    "_id": "6277c8097ea49129ec2dfc13",
+    "name": "Oportunidades",
+    "__v": 0
+  },
+  {
+    "_id": "6277c929f32f4c23ca504f3c",
+    "name": "Belleza",
+    "__v": 0
+  }
+]

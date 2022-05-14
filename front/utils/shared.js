@@ -1,15 +1,11 @@
 import moment from "moment";
-
+moment.suppressDeprecationWarnings = true;
 export const getFormattedPrice = (price) => {
   return Number(price.replace(/[^\d(.|,)-]/g, "").replace(",", "."));
 };
 
 export const getMaxSizeText = (str, numChars) => {
   return str.substring(0, numChars) + "...";
-};
-
-export const checkIfAccountNotExists = (host) => {
-  return localStorage.getItem(host) === null ? true : false;
 };
 
 export const checkEmail = (email) => {
@@ -83,7 +79,9 @@ export const isEmptyObject = (obj) => {
 };
 
 export const formatDate = (date, format = "DD-MM-YYYY HH:mm:ss") => {
-  return moment(date).format(format);
+  let formatDate = date;
+  if (date === null) formatDate = new Date().toString();
+  return moment(new Date(formatDate)).format(format);
 };
 export const isTodayDate = (date) => {
   return moment().isSame(date, "day"); // Return true if we are the 2010-02-01
@@ -116,4 +114,40 @@ export const getDiffPrices = (p1, p2) => {
 
 export const countNumProducts = (array, id) => {
   return array.filter((e) => e._id === id).length;
+};
+
+export const recalculatePriceTime = (price = 0, oldTime, newTime) => {
+  let returnPrice = +price;
+  if (oldTime === newTime) returnPrice = price;
+  else {
+    if (oldTime === "month") {
+      if (newTime === "triMonth") returnPrice = price * 3;
+      else if (newTime === "year") returnPrice = price * 12;
+      else if (newTime === "week") returnPrice = price / 4;
+    } else if (oldTime === "triMonth") {
+      if (newTime === "month") returnPrice = price / 3;
+      else if (newTime === "year") returnPrice = (price / 3) * 12;
+      else if (newTime === "week") returnPrice = price / 3 / 4;
+    } else if (oldTime === "year") {
+      if (newTime === "month") returnPrice = price / 12;
+      else if (newTime === "triMonth") returnPrice = (price / 12) * 3;
+      else if (newTime === "week") returnPrice = price / 12 / 4;
+    } else if (oldTime === "week") {
+      if (newTime === "month") returnPrice = price * 4;
+      else if (newTime === "triMonth") returnPrice = price * 4 * 3;
+      else if (newTime === "year") returnPrice = price * 4 * 12;
+    } else returnPrice = price;
+  }
+  return +returnPrice;
+};
+export const calculatePriceQty = (array, estimate) => {
+  let price = 0;
+  let objArray = {};
+  array.map((e) => {
+    objArray[e._id] = e.price;
+  });
+  estimate.map((est) => {
+    price += est.qty * objArray[est._id];
+  });
+  return price.toFixed(2);
 };
