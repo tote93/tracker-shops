@@ -22,8 +22,9 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import EuroIcon from "@mui/icons-material/Euro";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import { setEstimatePriceType } from "../features/user/userSlice";
+import { importEstimate, setEstimatePriceType } from "../features/user/userSlice";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import { exportToJsonFile } from "../utils/shared";
 const Header = () => {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -72,6 +73,19 @@ const Header = () => {
     else if (selectTimeFrame === "triMonth") setTypeSelected("Trimestral");
     else if (selectTimeFrame === "year") setTypeSelected("Anual");
   };
+  const exportJsonFile = () => {
+    exportToJsonFile(estimate);
+    setAnchorEl(null);
+  };
+  const fileInput = React.useRef();
+  const handleFileInput = (e) => {
+    const fileReader = new FileReader();
+    fileReader.readAsText(e.target.files[0], "UTF-8");
+    fileReader.onload = (e) => {
+      dispatch(importEstimate(JSON.parse(e.target.result)));
+    };
+    handleCloseControls();
+  };
   return (
     <>
       <header className={styles.navbarHeader}>
@@ -105,13 +119,14 @@ const Header = () => {
                   Añadir a Favoritos
                 </MenuItem>
                 <Divider />
-                <MenuItem onClick={handleCloseControls}>
+                <MenuItem onClick={exportJsonFile}>
                   <IosShareIcon style={{ margin: "0 10px " }} />
                   Exportar
                 </MenuItem>
-                <MenuItem styleClick={handleCloseControls}>
+                <MenuItem styleclick={handleCloseControls} onClick={() => fileInput.current.click()}>
                   <AddCircleOutlineIcon style={{ margin: "0 10px " }} />
                   Importar
+                  <input onChange={handleFileInput} ref={fileInput} accept="application/JSON" type="file" style={{ display: "none" }} />
                 </MenuItem>
                 <Divider />
                 <MenuItem onClick={handleCloseControls}>

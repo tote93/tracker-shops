@@ -8,7 +8,17 @@ import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import MaterialTableComponent from "../components/MaterialTable";
 import DragHandleIcon from "@mui/icons-material/DragHandle";
-
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+/*  */
+import List from "@mui/material/List";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import SendIcon from "@mui/icons-material/Send";
+import CheckIcon from "@mui/icons-material/Check";
+import SimpleAreaChart from "../components/SimpleAreaChart";
+import BarChartComponent from "../components/BarChartComponent";
 function MyList() {
   const estimate = useSelector((state) => state.user.estimateInfo);
   const [currentEstimatePrice, setCurrentEstimatePrice] = useState(0);
@@ -23,25 +33,114 @@ function MyList() {
       setCurrentEstimatePrice(calculatePriceQty(data.data, estimate.items));
       const dataArray = [];
       estimate.items.map((prod) => {
-        const currPrice = data.data.find((e) => e._id === prod._id).price;
+        const estimatePrice = data.data.find((e) => e._id === prod._id).price;
         dataArray.push({
-          title: prod.title,
-          link: prod.link,
-          img: prod.img,
-          price: prod.price,
-          currPrice,
-          difference: getDiffPrices(prod.price, currPrice),
+          ...data.data.find((e) => e._id === prod._id),
+          estimatePrice: prod.price,
+          difference: getDiffPrices(prod.price, estimatePrice),
         });
       });
       setEstimateData(dataArray);
     } else setCurrentEstimatePrice(0);
   };
+  const fetchData = async () => {
+    await getLastUpdatePrice();
+  };
   useEffect(() => {
-    const fetchData = async () => {
-      await getLastUpdatePrice();
-    };
     fetchData();
   }, []);
+  const getIconPrice = (p1, p2) => {
+    const diff = getDiffPrices(p1.price, p2);
+    return diff > 0 ? (
+      <ArrowDownwardIcon style={{ color: "green", fontSize: "2rem" }} />
+    ) : diff < 0 ? (
+      <ArrowUpwardIcon style={{ color: "red", fontSize: "2rem" }} />
+    ) : (
+      <DragHandleIcon style={{ color: "orange", fontSize: "2rem" }} />
+    );
+  };
+  const dataToGraph = (array) => {
+    let data = [];
+    array.map((prod) => {
+      data.push({
+        name: formatDate(prod.dateTime, "DD-MM-YYYY"),
+        precio: prod.price,
+      });
+    });
+    return data;
+  };
+  /* Estimate price */
+  const [weekPrice, setweekPrice] = useState(recalculatePriceTime(estimate.totalPrice, estimate.type, "week"));
+  const [monthPrice, setmonthPrice] = useState(recalculatePriceTime(estimate.totalPrice, estimate.type, "month"));
+  const [triMonthPrice, settriMonthPrice] = useState(recalculatePriceTime(estimate.totalPrice, estimate.type, "triMonth"));
+  const [yearPrice, setyearPrice] = useState(recalculatePriceTime(estimate.totalPrice, estimate.type, "year"));
+
+  /* Current Prices */
+  const [currWeekPrice, setcurrWeekPrice] = useState(recalculatePriceTime(currentEstimatePrice, estimate.type, "week").toFixed(2));
+  const [currMonthPrice, setcurrMonthPrice] = useState(recalculatePriceTime(currentEstimatePrice, estimate.type, "month").toFixed(2));
+  const [currTriMonthPrice, setcurrTriMonthPrice] = useState(recalculatePriceTime(currentEstimatePrice, estimate.type, "triMonth").toFixed(2));
+  const [currYearPrice, setcurrYearPrice] = useState(recalculatePriceTime(currentEstimatePrice, estimate.type, "year").toFixed(2));
+
+  const [barChartData, setBarChartData] = useState([
+    {
+      name: "Semanal",
+      "Precio Actual": currWeekPrice,
+      "Precio mi lista": weekPrice,
+    },
+    {
+      name: "Mensual",
+      "Precio Actual": currMonthPrice,
+      "Precio mi lista": monthPrice,
+    },
+    {
+      name: "Trimestral",
+      "Precio Actual": currTriMonthPrice,
+      "Precio mi lista": triMonthPrice,
+    },
+    {
+      name: "Anual",
+      "Precio Actual": currYearPrice,
+      "Precio mi lista": yearPrice,
+    },
+  ]);
+
+  /* Build Data Chart */
+  useEffect(() => {
+    setweekPrice(recalculatePriceTime(estimate.totalPrice, estimate.type, "week"));
+    setmonthPrice(recalculatePriceTime(estimate.totalPrice, estimate.type, "month"));
+    settriMonthPrice(recalculatePriceTime(estimate.totalPrice, estimate.type, "triMonth"));
+    setyearPrice(recalculatePriceTime(estimate.totalPrice, estimate.type, "year"));
+
+    /* Current Prices */
+    setcurrWeekPrice(recalculatePriceTime(currentEstimatePrice, estimate.type, "week").toFixed(2));
+    setcurrMonthPrice(recalculatePriceTime(currentEstimatePrice, estimate.type, "month").toFixed(2));
+    setcurrTriMonthPrice(recalculatePriceTime(currentEstimatePrice, estimate.type, "triMonth").toFixed(2));
+    setcurrYearPrice(recalculatePriceTime(currentEstimatePrice, estimate.type, "year").toFixed(2));
+
+    setBarChartData([
+      {
+        name: "Semanal",
+        "Precio Actual": currWeekPrice,
+        "Precio mi lista": weekPrice,
+      },
+      {
+        name: "Mensual",
+        "Precio Actual": currMonthPrice,
+        "Precio mi lista": monthPrice,
+      },
+      {
+        name: "Trimestral",
+        "Precio Actual": currTriMonthPrice,
+        "Precio mi lista": triMonthPrice,
+      },
+      {
+        name: "Anual",
+        "Precio Actual": currYearPrice,
+        "Precio mi lista": yearPrice,
+      },
+    ]);
+    fetchData();
+  }, [estimate]);
 
   return (
     <div className={styles.root}>
@@ -64,16 +163,16 @@ function MyList() {
               <Divider />
               <div>
                 <Typography component="h4" variant="p">
-                  Precio Semanal: {recalculatePriceTime(estimate.totalPrice, estimate.type, "week")} <EuroIcon style={{ fontSize: "1rem" }} />
+                  Precio Semanal: {weekPrice} <EuroIcon style={{ fontSize: "1rem" }} />
                 </Typography>
                 <Typography component="h4" variant="p">
-                  Precio Mensual: {recalculatePriceTime(estimate.totalPrice, estimate.type, "month")} <EuroIcon style={{ fontSize: "1rem" }} />
+                  Precio Mensual: {monthPrice} <EuroIcon style={{ fontSize: "1rem" }} />
                 </Typography>
                 <Typography component="h4" variant="p">
-                  Precio Trimestral: {recalculatePriceTime(estimate.totalPrice, estimate.type, "triMonth")} <EuroIcon style={{ fontSize: "1rem" }} />
+                  Precio Trimestral: {triMonthPrice} <EuroIcon style={{ fontSize: "1rem" }} />
                 </Typography>
                 <Typography component="h4" variant="p">
-                  Precio Anual: {recalculatePriceTime(estimate.totalPrice, estimate.type, "year")} <EuroIcon style={{ fontSize: "1rem" }} />
+                  Precio Anual: {yearPrice} <EuroIcon style={{ fontSize: "1rem" }} />
                 </Typography>
               </div>
             </div>
@@ -84,25 +183,27 @@ function MyList() {
               <Divider />
               <div>
                 <Typography component="h4" variant="p">
-                  Precio Semanal: {recalculatePriceTime(currentEstimatePrice, estimate.type, "week").toFixed(2)} <EuroIcon style={{ fontSize: "1rem" }} />
+                  Precio Semanal: {currWeekPrice} <EuroIcon style={{ fontSize: "1rem" }} />
                 </Typography>
 
                 <Typography component="h4" variant="p">
-                  Precio Mensual: {recalculatePriceTime(currentEstimatePrice, estimate.type, "month").toFixed(2)} <EuroIcon style={{ fontSize: "1rem" }} />
+                  Precio Mensual: {currMonthPrice} <EuroIcon style={{ fontSize: "1rem" }} />
                 </Typography>
 
                 <Typography component="h4" variant="p">
-                  Precio Trimestral: {recalculatePriceTime(currentEstimatePrice, estimate.type, "triMonth").toFixed(2)} <EuroIcon style={{ fontSize: "1rem" }} />
+                  Precio Trimestral: {currTriMonthPrice} <EuroIcon style={{ fontSize: "1rem" }} />
                 </Typography>
 
                 <Typography component="h4" variant="p">
-                  Precio Anual: {recalculatePriceTime(currentEstimatePrice, estimate.type, "year").toFixed(2)} <EuroIcon style={{ fontSize: "1rem" }} />
+                  Precio Anual: {currYearPrice} <EuroIcon style={{ fontSize: "1rem" }} />
                 </Typography>
               </div>
             </div>
           </div>
         </div>
-        <div className={styles.listHeaderGraph}>asd</div>
+        <div className={styles.listHeaderGraph}>
+          <BarChartComponent chartData={barChartData} firstBar={"Precio Actual"} secondBar={"Precio mi lista"} />
+        </div>
       </div>
       <Divider />
       <div className={styles.listHeader}>
@@ -121,13 +222,13 @@ function MyList() {
                 field: "title",
                 render: (rowData) => <div className={styles.rowTable}>{getMaxSizeText(rowData.title, 100)}</div>,
               },
-              { title: "Precio", field: "price", render: (rowData) => <div className={styles.rowTable}>{rowData.price} €</div> },
-              { title: "Precio Actual", field: "price", render: (rowData) => <div className={styles.rowTable}>{rowData.currPrice} €</div> },
+              { title: "Precio Lista", field: "estimatePrice", render: (rowData) => <div className={styles.rowTable}>{rowData.estimatePrice} €</div> },
+              { title: "Precio Actual", field: "price", render: (rowData) => <div className={styles.rowTable}>{rowData.price} €</div> },
               {
                 title: "Diferencia",
                 field: "difference",
                 render: (rowData) => (
-                  <div className={styles.rowTable} style={{ color: rowData.difference < 0 ? "green" : rowData.difference > 0 ? "red" : "orange" }}>
+                  <div className={styles.rowTable} style={{ color: rowData.difference < 0 ? "red" : rowData.difference > 0 ? "green" : "orange" }}>
                     <span style={{ display: "flex", alignItems: "center" }}>
                       {rowData.difference < 0 ? <ArrowDropUpIcon /> : rowData.difference > 0 ? <ArrowDropDownIcon /> : <DragHandleIcon />} {rowData.difference} €
                     </span>
@@ -142,15 +243,27 @@ function MyList() {
               maxBodyHeight: "80vh",
             }}
             detailPanel={(rowData) => {
-              return (
-                <iframe
-                  width="100%"
-                  height="315"
-                  src="https://www.youtube.com/embed/C0DPdy98e4c"
-                  frameborder="0"
-                  allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen
-                />
+              return rowData.priceHistory.length > 0 ? (
+                <div className={styles.tableInfoContainer}>
+                  <div className={styles.tableInfoData}>
+                    <List sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }} component="nav" aria-labelledby="Historico Productos">
+                      {rowData.priceHistory.map((prod, i) => {
+                        return (
+                          <ListItemButton key={rowData._id + i} style={{ fontSize: "2rem" }}>
+                            <ListItemIcon>
+                              {i === 0 ? <CheckIcon style={{ color: "green", fontSize: "2rem" }} /> : getIconPrice(rowData.priceHistory[i - 1], prod.price)}
+                            </ListItemIcon>
+                            <ListItemText primary={prod.price + " €"} style={{ margin: "0 10px", width: "80px" }} />
+                            <ListItemText primary={formatDate(prod.dateTime, "HH:mm DD-MM-YYYY")} style={{ margin: "0 10px" }} />
+                          </ListItemButton>
+                        );
+                      })}
+                    </List>
+                  </div>
+                  <div className={styles.tableInfoGraph}>{<SimpleAreaChart hSize={200} chartData={dataToGraph(rowData.priceHistory)} xValue="precio" />}</div>
+                </div>
+              ) : (
+                <h1>Sin Resultados</h1>
               );
             }}
             onRowClick={(event, rowData, togglePanel) => togglePanel()}

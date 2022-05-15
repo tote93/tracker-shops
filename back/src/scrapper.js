@@ -11,10 +11,10 @@ const CARREFOUR_SECTIONS = [
   { url: "/supermercado/drinks/cat20003/c", tag: ["Bebidas"], name: "bebidas" },
 
   { url: "/supermercado/cleaning-and-household/cat20005/c", tag: ["Limpieza"], name: "limpieza" },
-  { url: "/supermercado/perfumery-and-hygiene/cat20004/c", tag: ["Perfumería", "Higiene"], name: "perf_higiene" }, */
+  { url: "/supermercado/perfumery-and-hygiene/cat20004/c", tag: ["Perfumería", "Higiene"], name: "perf_higiene" },
 
-  /*   { url: "/supermercado/para-pharmacy/cat20008/c", tag: ["Parafarmacia"], name: "paraFarm" },
-  { url: "/casa-hogar", tag: ["Hogar"] }, */
+  { url: "/supermercado/para-pharmacy/cat20008/c", tag: ["Parafarmacia"], name: "paraFarm" },
+  */ { url: "/casa-hogar", tag: ["Hogar"] },
   { url: "/cuidado-personal-y-salud", tag: ["Higiene", "Salud"], name: "salud1" },
   { url: "/health-and-beauty/cat15966350/c", tag: ["Salud", "Belleza"], name: "salud" },
   { url: "/pequenos-productores/cat4510248/c", tag: ["Supermercado"], name: "super3" },
@@ -38,7 +38,7 @@ async function scrappeCarrefour() {
     for (let index = 0; index < CARREFOUR_SECTIONS.length; index++) {
       const section = CARREFOUR_SECTIONS[index];
       productArray = [];
-
+      await delay(5000);
       await driver.get(baseURL + section.url);
       await delay(2000);
       if (start) {
@@ -81,6 +81,7 @@ async function scrappeCarrefour() {
       }
     }
   } finally {
+    console.log("Finished scrapping");
     await driver.quit();
   }
 }

@@ -6,9 +6,10 @@
 .listHeader {
   width: 100%;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   flex-wrap: wrap;
+  margin: 0 0 20px 0;
 }
 .listHeaderData {
   flex: 0.5;
@@ -23,7 +24,7 @@
 }
 .listHeaderGraph {
   flex: 0.5;
-  background-color: red;
+  margin: 20px 0 0 0;
 }
 
 .listHeaderDates {
@@ -64,4 +65,21 @@
 }
 .rowTable {
   font-weight: 700;
+}
+
+.tableInfoContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  flex-wrap: wrap;
+}
+.tableInfoData {
+  flex: 0.3;
+  width: 100%;
+}
+.tableInfoGraph {
+  flex: 0.7;
+  width: 100%;
 }
