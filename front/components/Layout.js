@@ -12,7 +12,7 @@ const Layout = ({ children }) => {
     const allSelections = document.querySelectorAll(".selected_path");
     allSelections.forEach((el) => el.classList.remove("selected_path"));
     switch (path) {
-      case "/misProductos":
+      case "/":
         if (document.querySelector("#myProducts")) document.querySelector("#myProducts").classList.add("selected_path");
         break;
       case "/addProduct":
@@ -31,7 +31,8 @@ const Layout = ({ children }) => {
   }, [router]);
   React.useEffect(() => {
     // Perform localStorage action
-    //router.push("/categories");
+    console.log(router.pathname, "--path");
+    if (router.pathname !== "/") router.push("/");
   }, []);
   return (
     <div className="content">

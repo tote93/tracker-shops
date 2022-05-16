@@ -52,7 +52,7 @@ export default function Product({ product }) {
             </Tooltip>
           }
           avatar={<Avatar aria-label="product" className={styles.avatar} src={getImageProduct(componentProduct.img)} />}
-          title={getMaxSizeText(componentProduct.title, 95)}
+          title={getMaxSizeText(componentProduct.title, 55)}
         />
         <CardMedia className={styles.media} image={componentProduct.img} />
         <CardContent className={styles.priceContent}>

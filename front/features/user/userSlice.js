@@ -3,6 +3,7 @@ import { formatDate, recalculatePriceTime } from "../../utils/shared";
 export const userAccount = createSlice({
   name: "user",
   initialState: {
+
     estimateInfo: { name: "Mi Lista de Compra", items: [] },
   },
   reducers: {

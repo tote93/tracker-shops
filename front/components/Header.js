@@ -9,7 +9,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import SettingsIcon from "@mui/icons-material/Settings";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import { Divider, FormControl, FormHelperText, IconButton, Select, InputLabel, Typography } from "@mui/material";
+import { Divider, FormHelperText, IconButton, Select, InputLabel, Typography } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -151,13 +151,13 @@ const Header = () => {
         {/* Bottom Nav */}
         <div className={styles.actionbars}>
           <div style={{ display: "flex", alignItems: "center" }} id="myProducts">
-            <div className={styles.link} onClick={(e) => handleRedirect(e, "/misProductos")}>
+            <div className={styles.link} onClick={(e) => handleRedirect(e, "/")}>
               <ShoppingCartIcon className="icon" />
               <p className={styles.item}>Mi Lista</p>
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "center" }} id="categories">
-            <div className={styles.link} onClick={(e) => handleRedirect(e, "/")}>
+            <div className={styles.link} onClick={(e) => handleRedirect(e, "/categorias")}>
               <StoreIcon className="icon" />
               <p className={styles.item}>Categorias</p>
             </div>
