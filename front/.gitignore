@@ -32,3 +32,5 @@ yarn-error.log*
 .vercel
 
 .next/*
+
+user_db/*

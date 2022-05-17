@@ -10,9 +10,7 @@ import store from "../app/store";
 import GlobalNotifications from "../components/GlobalNotifications";
 import Layout from "../components/Layout";
 
-/*import GlobalNotifications from "../components/GlobalNotifications";
-import Layout from "../components/Layout";
-import LoadingModal from "../components/LoadingModal"; */
+import LoadingModal from "../components/LoadingModal";
 export default function MyApp(props) {
   const { Component, pageProps } = props;
   return (
@@ -25,10 +23,10 @@ export default function MyApp(props) {
           <Layout>
             <CssBaseline />
             <Component {...pageProps} />
-            {/* <LoadingModal /> */}
+            <LoadingModal />
             <GlobalNotifications />
           </Layout>
-        </React.Fragment>{" "}
+        </React.Fragment>
       </Provider>
     </ThemeProvider>
   );

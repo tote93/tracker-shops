@@ -22,14 +22,16 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import EuroIcon from "@mui/icons-material/Euro";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import { importEstimate, setEstimatePriceType } from "../features/user/userSlice";
+import { importEstimate, removeEstimateInfo, setEstimatePriceType, setEstimateName } from "../features/user/userSlice";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { exportToJsonFile } from "../utils/shared";
+import { setNotification } from "../features/common/common";
+import { addToFavorites, getFavorites } from "../lib/pouchDatabase";
 const Header = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const estimate = useSelector((state) => state.user.estimateInfo);
-  const [estimateName, setEstimateName] = React.useState(estimate.name);
+  const [estimateName, setNameEstimate] = React.useState(estimate.name);
   const [openEstimateDialog, setOpenEstimateDialog] = React.useState(false);
   const handleOpenEstimateDialog = () => setOpenEstimateDialog(true);
   const handleCloseEstimateDialog = () => setOpenEstimateDialog(false);
@@ -37,7 +39,10 @@ const Header = () => {
   const [openTimeFrame, setOpenTimeFrame] = React.useState(false);
   const handleOpenTimeFrame = () => setOpenTimeFrame(true);
   const handleCloseTimeFrame = () => setOpenTimeFrame(false);
-  const [timeFrame, setTimeFrame] = React.useState(estimate.type);
+  const [timeFrame, setTimeFrame] = React.useState(estimate.type || "month");
+  React.useEffect(() => {
+    setNameEstimate(estimate.name);
+  }, [estimate]);
 
   const handleRedirect = (e, href) => {
     e.preventDefault();
@@ -57,8 +62,8 @@ const Header = () => {
   }, []);
 
   const dispatchEstimateName = () => {
-    handleCloseEstimateDialog();
     dispatch(setEstimateName(estimateName));
+    handleCloseEstimateDialog();
   };
   const validateTimeFrame = () => {
     if (timeFrame !== estimate.type) {
@@ -82,8 +87,30 @@ const Header = () => {
     const fileReader = new FileReader();
     fileReader.readAsText(e.target.files[0], "UTF-8");
     fileReader.onload = (e) => {
-      dispatch(importEstimate(JSON.parse(e.target.result)));
+      const jsonFile = JSON.parse(e.target.result);
+      if (
+        jsonFile.hasOwnProperty("totalPrice") &&
+        jsonFile.hasOwnProperty("items") &&
+        jsonFile.hasOwnProperty("name") &&
+        jsonFile.hasOwnProperty("type") &&
+        jsonFile.hasOwnProperty("date")
+      ) {
+        dispatch(importEstimate(jsonFile));
+        dispatch(setNotification({ severity: "success", title: `Archivo importado con exito.`, duration: 2000 }));
+      } else {
+        dispatch(setNotification({ severity: "error", title: `Archivo corrupto o no valido.`, duration: 2000 }));
+      }
     };
+    handleCloseControls();
+  };
+
+  const deleteAllData = () => {
+    dispatch(removeEstimateInfo());
+    dispatch(setNotification({ severity: "success", title: `Estimado borrado correctamente.`, duration: 2000 }));
+    handleCloseControls();
+  };
+  const addToFavoritesHandler = async () => {
+    await addToFavorites(estimate);
     handleCloseControls();
   };
   return (
@@ -114,7 +141,7 @@ const Header = () => {
                   horizontal: "left",
                 }}
               >
-                <MenuItem onClick={handleCloseControls}>
+                <MenuItem onClick={addToFavoritesHandler}>
                   <FavoriteBorderIcon style={{ margin: "0 10px " }} />
                   Añadir a Favoritos
                 </MenuItem>
@@ -123,13 +150,13 @@ const Header = () => {
                   <IosShareIcon style={{ margin: "0 10px " }} />
                   Exportar
                 </MenuItem>
-                <MenuItem styleclick={handleCloseControls} onClick={() => fileInput.current.click()}>
+                <MenuItem onClick={() => fileInput.current.click()}>
                   <AddCircleOutlineIcon style={{ margin: "0 10px " }} />
                   Importar
                   <input onChange={handleFileInput} ref={fileInput} accept="application/JSON" type="file" style={{ display: "none" }} />
                 </MenuItem>
                 <Divider />
-                <MenuItem onClick={handleCloseControls}>
+                <MenuItem onClick={deleteAllData}>
                   <DeleteOutlineIcon style={{ margin: "0 10px " }} />
                   Borrar Todo
                 </MenuItem>
@@ -163,7 +190,7 @@ const Header = () => {
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "center" }} id="favorites">
-            <div className={styles.link} onClick={(e) => handleRedirect(e, "/")}>
+            <div className={styles.link} onClick={(e) => handleRedirect(e, "/favorites")}>
               <FavoriteIcon className="icon" />
               <p className={styles.item}>Mis Favoritos</p>
             </div>
@@ -192,8 +219,9 @@ const Header = () => {
             value={estimateName}
             label="Nombre de la configuración"
             type="text"
-            onChange={(e) => setEstimateName(e.target.value || "")}
+            onChange={(e) => setNameEstimate(e.target.value || "")}
             fullWidth
+            inputProps={{ maxLength: 40 }}
             variant="standard"
           />
         </DialogContent>

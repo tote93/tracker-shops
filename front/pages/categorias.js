@@ -1,18 +1,15 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import Category from "../components/Category";
-
 import styles from "../styles/Category.module.css";
-
 import { useDispatch } from "react-redux";
-import { setCategories } from "../features/common/common";
-
+import { Typography } from "@mui/material";
 export default function Categorias(/* { categories, products, count } */) {
-  const dispatch = useDispatch();
   const categories = useSelector((state) => state.common.categories);
   const categoryObj = useSelector((state) => state.common.categoryProducts);
+  const loading = useSelector((state) => state.common.loading);
   const totalProducts = useSelector((state) => state.common.countProducts);
-  // dispatch(setCategories(categories));
+
   const categoryHasProducts = (categoryname) => {
     if (categoryObj.hasOwnProperty(categoryname)) {
       if (categoryObj[categoryname] > 0) return categoryObj[categoryname];
@@ -22,10 +19,18 @@ export default function Categorias(/* { categories, products, count } */) {
   };
   return (
     <div className={styles.container}>
-      {categories.map((cat) => {
-        return <Category key={cat.name} name={cat.name} img={cat.img} numProducts={categoryHasProducts(cat.name)}></Category>;
-      })}
-      {/*  <Category key={"allproducts"} name={"Todos"} numProducts={totalProducts}></Category>; */}
+      {categories.length ? (
+        <>
+          <Category name="Tienda Completa" numProducts={totalProducts} fetch="all"></Category>;
+          {categories.map((cat) => {
+            return <Category key={cat.name} name={cat.name} fetch={cat.name} img={cat.img} numProducts={categoryHasProducts(cat.name)}></Category>;
+          })}
+        </>
+      ) : (
+        <Typography component="h1" variant="h5">
+          {loading ? "Cargando..." : "No se han encontrado categorias.."}
+        </Typography>
+      )}
     </div>
   );
 }

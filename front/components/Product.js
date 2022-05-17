@@ -1,34 +1,30 @@
 import React, { useEffect, useState } from "react";
-import { Card, CardHeader, CardMedia, CardContent, IconButton, Tooltip } from "@mui/material";
-import { makeStyles, createStyles } from "@mui/styles";
+import { Card, CardHeader, CardMedia, CardContent, Tooltip } from "@mui/material";
 import { Button, CardActionArea, CardActions, Typography } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { countNumProducts, formatDate, getDiffPrices, getImageProduct, getMaxSizeText } from "../utils/shared";
 import Avatar from "@mui/material/Avatar";
-
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import DragHandleIcon from "@mui/icons-material/DragHandle";
 import TimelineIcon from "@mui/icons-material/Timeline";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import { addNewProduct } from "../features/user/userSlice";
+import { addNewProduct, deleteProduct } from "../features/user/userSlice";
 import { setNotification } from "../features/common/common";
 import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
 import styles from "../styles/Product.module.css";
-
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 export default function Product({ product }) {
   const [componentProduct, setComponentProduct] = useState(product);
-
   const estimate = useSelector((state) => state.user.estimateInfo);
-
+  const [numProducts, setNumProducts] = useState();
   const dispatch = useDispatch();
   const openNewURL = () => {
-    window.open(componentProduct.url, "_blank");
+    window.open(componentProduct.link, "_blank");
   };
   const checkPriceDiff = () => {
     return getDiffPrices(componentProduct.price, componentProduct.priceHistory[componentProduct.priceHistory.length - 2].price);
   };
-
   const addProductToBasket = () => {
     let updateProductQty = { ...product, qty: 1 };
     try {
@@ -38,18 +34,35 @@ export default function Product({ product }) {
       dispatch(setNotification({ severity: "error", title: `Error ${error.message}.` }));
     }
   };
-
+  useEffect(() => {
+    setNumProducts(countNumProducts(estimate.items, product._id));
+  }, [estimate]);
+  const removeProductBasket = () => {
+    try {
+      dispatch(deleteProduct(product._id));
+      dispatch(setNotification({ severity: "success", title: `Producto eliminado de la lista.`, duration: 2000 }));
+    } catch (error) {
+      dispatch(setNotification({ severity: "error", title: `Error ${error.message}.` }));
+    }
+  };
   return (
     <Card className={styles.root}>
       <CardActionArea>
         <CardHeader
           action={
-            <Tooltip title={`Tienes (${countNumProducts(estimate.items, product._id)}) de este producto en la lista.`}>
-              <div className={styles.actions__shop}>
-                <ShoppingBasketIcon className={styles.icon} />
-                <span className={styles.basket__ball}>{countNumProducts(estimate.items, product._id)}</span>
-              </div>
-            </Tooltip>
+            <div style={{ display: "flex" }}>
+              <Tooltip title={`Quitar de mi cesta.`}>
+                <div className={styles.actions__shop} onClick={() => numProducts && removeProductBasket()}>
+                  <DeleteOutlineIcon className={styles.icon} style={{ color: numProducts ? "red" : "gray" }} />
+                </div>
+              </Tooltip>
+              <Tooltip title={`Tienes (${numProducts}) en tu cesta.`}>
+                <div className={styles.actions__shop}>
+                  <ShoppingBasketIcon className={styles.icon} />
+                  <span className={styles.basket__ball}>{numProducts || 0}</span>
+                </div>
+              </Tooltip>
+            </div>
           }
           avatar={<Avatar aria-label="product" className={styles.avatar} src={getImageProduct(componentProduct.img)} />}
           title={getMaxSizeText(componentProduct.title, 55)}

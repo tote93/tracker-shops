@@ -8,7 +8,7 @@
 }
 .notification-container {
   width: fit-content !important;
-  height: 95%;
+  height: fit-content;
   bottom: 0 !important;
   top: auto !important;
 }

@@ -11,7 +11,8 @@ import DragHandleIcon from "@mui/icons-material/DragHandle";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import { useDispatch } from "react-redux";
-
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -19,41 +20,83 @@ import ListItemText from "@mui/material/ListItemText";
 import CheckIcon from "@mui/icons-material/Check";
 import SimpleAreaChart from "../components/SimpleAreaChart";
 import BarChartComponent from "../components/BarChartComponent";
-import { setCategories, setCategoryProducts, setProducts, setTotalProducts } from "../features/common/common";
-function MyList({ categories, products, count, categoryProducts }) {
+import "../lib/pouchDatabase";
+import { deleteProduct, removeAllTypeProducts } from "../features/user/userSlice";
+import { setNotification } from "../features/common/common";
+function MyList() {
   const dispatch = useDispatch();
   const estimate = useSelector((state) => state.user.estimateInfo);
   const [currentEstimatePrice, setCurrentEstimatePrice] = useState(0);
   const [estimateData, setEstimateData] = useState(null);
   const [userProducts, setuserProducts] = useState([]);
+
   const getLastUpdatePrice = async () => {
     let itemsIds = [...new Set(estimate.items.map((e) => e._id))];
     const response = await fetch("api/getUserProducts", { method: "POST", body: JSON.stringify(itemsIds) });
     const data = await response.json();
     if (data.data.length) {
-      setuserProducts(data.data);
-      setCurrentEstimatePrice(calculatePriceQty(data.data, estimate.items));
+      //setuserProducts(data.data);
+      const estimatePrice = calculatePriceQty(data.data, estimate.items);
+      setCurrentEstimatePrice(estimatePrice);
       const dataArray = [];
       estimate.items.map((prod) => {
-        const estimatePrice = data.data.find((e) => e._id === prod._id).price;
-        dataArray.push({
-          ...data.data.find((e) => e._id === prod._id),
-          estimatePrice: prod.price,
-          difference: getDiffPrices(prod.price, estimatePrice),
-        });
+        const estimatePrice = data.data.find((e) => e._id === prod._id);
+        if (estimatePrice)
+          dataArray.push({
+            ...data.data.find((e) => e._id === prod._id),
+            estimatePrice: prod.price,
+            difference: getDiffPrices(prod.price, estimatePrice.price),
+          });
       });
-      setEstimateData(dataArray);
+      console.log(dataArray, "---");
+      setEstimateData([...dataArray]);
+      const weekPriceData = recalculatePriceTime(estimatePrice, estimate.type, "week").toFixed(2);
+      const monthPriceData = recalculatePriceTime(estimatePrice, estimate.type, "month").toFixed(2);
+      const triMonthPriceData = recalculatePriceTime(estimatePrice, estimate.type, "triMonth").toFixed(2);
+      const yearPriceData = recalculatePriceTime(estimatePrice, estimate.type, "year").toFixed(2);
+
+      const estweekPriceData = recalculatePriceTime(estimate.totalPrice, estimate.type, "week").toFixed(2);
+      const estmonthPriceData = recalculatePriceTime(estimate.totalPrice, estimate.type, "month").toFixed(2);
+      const esttriMonthPriceData = recalculatePriceTime(estimate.totalPrice, estimate.type, "triMonth").toFixed(2);
+      const estyearPriceData = recalculatePriceTime(estimate.totalPrice, estimate.type, "year").toFixed(2);
+
+      setweekPrice(estweekPriceData);
+      setmonthPrice(estmonthPriceData);
+      settriMonthPrice(esttriMonthPriceData);
+      setyearPrice(estyearPriceData);
+
+      setcurrWeekPrice(weekPriceData);
+      setcurrMonthPrice(monthPriceData);
+      setcurrTriMonthPrice(triMonthPriceData);
+      setcurrYearPrice(yearPriceData);
+      setBarChartData([
+        {
+          name: "Semanal",
+          "Precio Actual": weekPriceData,
+          "Precio mi lista": estweekPriceData,
+        },
+        {
+          name: "Mensual",
+          "Precio Actual": monthPriceData,
+          "Precio mi lista": estmonthPriceData,
+        },
+        {
+          name: "Trimestral",
+          "Precio Actual": triMonthPriceData,
+          "Precio mi lista": esttriMonthPriceData,
+        },
+        {
+          name: "Anual",
+          "Precio Actual": yearPriceData,
+          "Precio mi lista": estyearPriceData,
+        },
+      ]);
     } else setCurrentEstimatePrice(0);
   };
   const fetchData = async () => {
     await getLastUpdatePrice();
   };
-  useEffect(() => {
-    dispatch(setProducts(products));
-    dispatch(setCategories(categories));
-    dispatch(setTotalProducts(count));
-    dispatch(setCategoryProducts(categoryProducts));
-  }, []);
+
   const getIconPrice = (p1, p2) => {
     const diff = getDiffPrices(p1.price, p2);
     return diff > 0 ? (
@@ -74,6 +117,7 @@ function MyList({ categories, products, count, categoryProducts }) {
     });
     return data;
   };
+
   /* Estimate price */
   const [weekPrice, setweekPrice] = useState(recalculatePriceTime(estimate.totalPrice, estimate.type, "week"));
   const [monthPrice, setmonthPrice] = useState(recalculatePriceTime(estimate.totalPrice, estimate.type, "month"));
@@ -111,97 +155,112 @@ function MyList({ categories, products, count, categoryProducts }) {
 
   /* Build Data Chart */
   useEffect(() => {
-    setweekPrice(recalculatePriceTime(estimate.totalPrice, estimate.type, "week"));
-    setmonthPrice(recalculatePriceTime(estimate.totalPrice, estimate.type, "month"));
-    settriMonthPrice(recalculatePriceTime(estimate.totalPrice, estimate.type, "triMonth"));
-    setyearPrice(recalculatePriceTime(estimate.totalPrice, estimate.type, "year"));
-
-    /* Current Prices */
-    setcurrWeekPrice(recalculatePriceTime(currentEstimatePrice, estimate.type, "week").toFixed(2));
-    setcurrMonthPrice(recalculatePriceTime(currentEstimatePrice, estimate.type, "month").toFixed(2));
-    setcurrTriMonthPrice(recalculatePriceTime(currentEstimatePrice, estimate.type, "triMonth").toFixed(2));
-    setcurrYearPrice(recalculatePriceTime(currentEstimatePrice, estimate.type, "year").toFixed(2));
-
-    setBarChartData([
-      {
-        name: "Semanal",
-        "Precio Actual": currWeekPrice,
-        "Precio mi lista": weekPrice,
-      },
-      {
-        name: "Mensual",
-        "Precio Actual": currMonthPrice,
-        "Precio mi lista": monthPrice,
-      },
-      {
-        name: "Trimestral",
-        "Precio Actual": currTriMonthPrice,
-        "Precio mi lista": triMonthPrice,
-      },
-      {
-        name: "Anual",
-        "Precio Actual": currYearPrice,
-        "Precio mi lista": yearPrice,
-      },
-    ]);
-    fetchData();
+    if (estimate.items.length) fetchData();
+    else resetData();
   }, [estimate]);
+  const resetData = () => {
+    setEstimateData(null);
+    setCurrentEstimatePrice(0);
+    setweekPrice(0);
+    setmonthPrice(0);
+    settriMonthPrice(0);
+    setyearPrice(0);
+    setcurrWeekPrice(0);
+    setcurrMonthPrice(0);
+    setcurrTriMonthPrice(0);
+    setcurrYearPrice(0);
+    setBarChartData([]);
+    setuserProducts([]);
+  };
 
+  const getItemFromEstimate = (item) => {
+    const found = estimate.items.find((i) => i._id === item._id);
+    if (found) return found.qty;
+    else return 0;
+  };
+  const getTimeLabel = () => {
+    let label = "Semanal";
+    switch (estimate.type) {
+      case "month":
+        label = "Mensual";
+        break;
+      case "trimonth":
+        label = "Trimestral";
+        break;
+      case "year":
+        label = "Anual";
+        break;
+      default:
+        break;
+    }
+    return label;
+  };
+  const deleteProducts = (data, type) => {
+    try {
+      if (type === "all") dispatch(removeAllTypeProducts(data._id));
+      else dispatch(deleteProduct(data._id));
+      dispatch(setNotification({ severity: "success", title: `Producto eliminado de la lista.`, duration: 2000 }));
+    } catch (error) {
+      dispatch(setNotification({ severity: "error", title: `Error ${error.message}.` }));
+    }
+  };
   return (
     <div className={styles.root}>
       <div className={styles.listHeader}>
-        <div className={styles.listHeaderData}>
-          <div className={styles.listHeaderInfo}>
-            <Typography component="h3" variant="p">
-              {estimate.name}
-            </Typography>
-            <Typography component="h3" variant="p">
-              Productos: {estimate.items.length}
-            </Typography>
-          </div>
-          <Divider />
-          <div className={styles.listHeaderDates}>
-            <div className={styles.listHeaderDateEstimate}>
+        <div style={{ flex: "0.5" }}>
+          <div>
+            <div className={styles.listHeaderInfo}>
               <Typography component="h3" variant="p">
-                Precio Creación: {estimate.date}
+                {estimate.name}
               </Typography>
-              <Divider />
-              <div>
-                <Typography component="h4" variant="p">
-                  Precio Semanal: {weekPrice} <EuroIcon style={{ fontSize: "1rem" }} />
-                </Typography>
-                <Typography component="h4" variant="p">
-                  Precio Mensual: {monthPrice} <EuroIcon style={{ fontSize: "1rem" }} />
-                </Typography>
-                <Typography component="h4" variant="p">
-                  Precio Trimestral: {triMonthPrice} <EuroIcon style={{ fontSize: "1rem" }} />
-                </Typography>
-                <Typography component="h4" variant="p">
-                  Precio Anual: {yearPrice} <EuroIcon style={{ fontSize: "1rem" }} />
-                </Typography>
-              </div>
+              <Typography component="h3" variant="p">
+                Productos: {estimate.items.length}
+              </Typography>
             </div>
-            <div className={styles.listHeaderDateCurrent}>
-              <Typography component="h3" variant="p">
-                Precio Actual: {formatDate(new Date().toDateString(), "hh:mm DD-MM-YYYY")}
-              </Typography>
-              <Divider />
-              <div>
-                <Typography component="h4" variant="p">
-                  Precio Semanal: {currWeekPrice} <EuroIcon style={{ fontSize: "1rem" }} />
+            <Divider />
+            <div className={styles.listHeaderDates}>
+              <div className={styles.listHeaderDateEstimate}>
+                <Typography component="h3" variant="p">
+                  Precio Creación: {estimate.date}
                 </Typography>
+                <Divider />
+                <div>
+                  <Typography component="h4" variant="p">
+                    Precio Semanal: {weekPrice} <EuroIcon style={{ fontSize: "1rem" }} />
+                  </Typography>
+                  <Typography component="h4" variant="p">
+                    Precio Mensual: {monthPrice} <EuroIcon style={{ fontSize: "1rem" }} />
+                  </Typography>
+                  <Typography component="h4" variant="p">
+                    Precio Trimestral: {triMonthPrice} <EuroIcon style={{ fontSize: "1rem" }} />
+                  </Typography>
+                  <Typography component="h4" variant="p">
+                    Precio Anual: {yearPrice} <EuroIcon style={{ fontSize: "1rem" }} />
+                  </Typography>
+                </div>
+              </div>
+              <div className={styles.listHeaderDateCurrent}>
+                <Typography component="h3" variant="p">
+                  Precio Actual: {formatDate(new Date().toDateString(), "hh:mm DD-MM-YYYY")}
+                </Typography>
+                <Divider />
+                <div>
+                  <Typography component="h4" variant="p">
+                    Precio Semanal: {currWeekPrice} <EuroIcon style={{ fontSize: "1rem" }} />
+                  </Typography>
 
-                <Typography component="h4" variant="p">
-                  Precio Mensual: {currMonthPrice} <EuroIcon style={{ fontSize: "1rem" }} />
-                </Typography>
+                  <Typography component="h4" variant="p">
+                    Precio Mensual: {currMonthPrice} <EuroIcon style={{ fontSize: "1rem" }} />
+                  </Typography>
 
-                <Typography component="h4" variant="p">
-                  Precio Trimestral: {currTriMonthPrice} <EuroIcon style={{ fontSize: "1rem" }} />
-                </Typography>
+                  <Typography component="h4" variant="p">
+                    Precio Trimestral: {currTriMonthPrice} <EuroIcon style={{ fontSize: "1rem" }} />
+                  </Typography>
 
-                <Typography component="h4" variant="p">
-                  Precio Anual: {currYearPrice} <EuroIcon style={{ fontSize: "1rem" }} />
-                </Typography>
+                  <Typography component="h4" variant="p">
+                    Precio Anual: {currYearPrice} <EuroIcon style={{ fontSize: "1rem" }} />
+                  </Typography>
+                </div>
               </div>
             </div>
           </div>
@@ -212,7 +271,7 @@ function MyList({ categories, products, count, categoryProducts }) {
       </div>
       <Divider />
       <div className={styles.listHeader}>
-        {estimateData && (
+        {estimateData && estimate.items && (
           <MaterialTableComponent
             title={estimate.name}
             columns={[
@@ -227,8 +286,26 @@ function MyList({ categories, products, count, categoryProducts }) {
                 field: "title",
                 render: (rowData) => <div className={styles.rowTable}>{getMaxSizeText(rowData.title, 100)}</div>,
               },
-              { title: "Precio Lista", field: "estimatePrice", render: (rowData) => <div className={styles.rowTable}>{rowData.estimatePrice} €</div> },
-              { title: "Precio Actual", field: "price", render: (rowData) => <div className={styles.rowTable}>{rowData.price} €</div> },
+              {
+                title: `Cantidad ${getTimeLabel()}`,
+                field: "qty",
+                render: (rowData) => <div className={styles.rowTable}>{getItemFromEstimate(rowData) || 0}</div>,
+              },
+              {
+                title: "Precio Unitario",
+                field: "estimatePrice",
+                render: (rowData) => <div className={styles.rowTable}>{rowData.estimatePrice} €</div>,
+              },
+              {
+                title: "Precio Lista",
+                field: "estimatePrice",
+                render: (rowData) => <div className={styles.rowTable}>{(getItemFromEstimate(rowData) * rowData.estimatePrice).toFixed(2)} €</div>,
+              },
+              {
+                title: "Precio Actual",
+                field: "price",
+                render: (rowData) => <div className={styles.rowTable}>{(getItemFromEstimate(rowData) * rowData.price).toFixed(2)} €</div>,
+              },
               {
                 title: "Diferencia",
                 field: "difference",
@@ -241,11 +318,24 @@ function MyList({ categories, products, count, categoryProducts }) {
                 ),
               },
             ]}
+            actions={[
+              (rowData) => ({
+                icon: () => <DeleteOutlineIcon />,
+                tooltip: "Eliminar 1 Unidad",
+                onClick: (event, rowData) => deleteProducts(rowData, "single"),
+              }),
+              (rowData) => ({
+                icon: () => <DeleteForeverIcon />,
+                tooltip: "Eliminar Todos",
+                onClick: (event, rowData) => deleteProducts(rowData, "all"),
+              }),
+            ]}
             data={estimateData}
             style={{ width: "100%" }}
             options={{
               sorting: false,
               maxBodyHeight: "80vh",
+              actionsColumnIndex: -1,
             }}
             detailPanel={(rowData) => {
               return rowData.priceHistory.length > 0 ? (
@@ -279,18 +369,20 @@ function MyList({ categories, products, count, categoryProducts }) {
   );
 }
 
-export default MyList;
-export async function getServerSideProps() {
-  let dev = process.env.NODE_ENV !== "production";
-  let { DEV_URL, PROD_URL } = process.env;
+export default MyList; /* 
+export async function getServerSideProps({ req, res }) {
+  console.log("Triggered server");
+  res.setHeader("Cache-Control", "public, s-maxage=10, stale-while-revalidate=59");
+let dev = process.env.NEXT_PUBLIC_NODE_ENV !== "production";
+  let { NEXT_PUBLIC_DEV_URL, NEXT_PUBLIC_PROD_URL } = process.env;
   if (dev) {
-    let response = await fetch(`${dev ? DEV_URL : DEV_URL}/api/categories`);
+    let response = await fetch(`${dev ? NEXT_PUBLIC_DEV_URL : NEXT_PUBLIC_DEV_URL}/api/categories`);
     // extract the data
     let categories = await response.json();
     let categoryCountObj = {};
     for (let index = 0; index < categories.message.length; index++) {
       const element = categories.message[index];
-      let responseCat = await fetch(`${dev ? DEV_URL : DEV_URL}/api/getDocumentByCategory`, {
+      let responseCat = await fetch(`${dev ? NEXT_PUBLIC_DEV_URL : NEXT_PUBLIC_DEV_URL}/api/getDocumentByCategory`, {
         method: "POST",
         body: element.name,
       });
@@ -298,21 +390,22 @@ export async function getServerSideProps() {
       let category = await responseCat.json();
       categoryCountObj[element.name] = category.data.length;
     }
-    let responseProd = await fetch(`${dev ? DEV_URL : DEV_URL}/api/products`);
+    let responseProd = await fetch(`${dev ? NEXT_PUBLIC_DEV_URL : NEXT_PUBLIC_DEV_URL}/api/products`);
     //let products = { message: [] }; //await responseProd.json();
     let products = await responseProd.json();
     // Pass data to the page via props
     return { props: { categories: categories.message, products: products.message, count: products.count, categoryProducts: categoryCountObj } };
   } else {
-    let response = await fetch(`${dev ? DEV_URL : DEV_URL}/api/categories`);
+    let response = await fetch(`${dev ? NEXT_PUBLIC_DEV_URL : NEXT_PUBLIC_DEV_URL}/api/categories`);
     // extract the data
     let categories = await response.json();
 
-    let responseProd = await fetch(`${dev ? DEV_URL : DEV_URL}/api/products`);
+    let responseProd = await fetch(`${dev ? NEXT_PUBLIC_DEV_URL : NEXT_PUBLIC_DEV_URL}/api/products`);
     //let products = { message: [] }; //await responseProd.json();
     let products = await responseProd.json();
     // Pass data to the page via props
     return { props: { categories: categories.message, products: products.message, count: products.count } };
-  }
+  } 
   // request posts from api
 }
+*/

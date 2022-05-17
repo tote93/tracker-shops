@@ -63,19 +63,18 @@ const useStyles = makeStyles(() =>
 function ModalProduct({ open, category, setOpen }) {
   const handleClose = () => setOpen(false);
   const [productList, setproductList] = React.useState([]);
-  const classes = useStyles();
-  const dispatch = useDispatch();
   React.useEffect(() => {
     const fetchData = async () => {
       const response = await fetch("/api/getDocumentByCategory", { method: "POST", body: category });
       const data = await response.json();
       setproductList(data.data);
     };
+
     fetchData();
   }, []);
 
   return (
-    <Dialog fullScreen open={open} onClose={handleClose} aria-labelledby="product-modal" aria-describedby="add product">
+    <Dialog fullScreen open={open} onClose={handleClose} aria-labelledby="product-modal" aria-describedby="Ver productos">
       <AppBar sx={{ position: "relative" }}>
         <Toolbar>
           <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
@@ -86,9 +85,6 @@ function ModalProduct({ open, category, setOpen }) {
       <DialogContent>
         <ProductList dataList={productList} count={productList.length} />
       </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose}>Disagree</Button>
-      </DialogActions>
     </Dialog>
   );
 }

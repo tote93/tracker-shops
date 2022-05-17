@@ -113,7 +113,9 @@ export const getDiffPrices = (p1, p2) => {
 };
 
 export const countNumProducts = (array, id) => {
-  return array.filter((e) => e._id === id).length;
+  const response = array.filter((e) => e._id === id);
+
+  return response.length > 0 ? response[0].qty : 0;
 };
 
 export const recalculatePriceTime = (price = 0, oldTime, newTime) => {
