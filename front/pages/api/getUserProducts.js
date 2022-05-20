@@ -1,6 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 
-import { connectToDatabase } from "../../lib/mongodb";
+import { connectToDatabase, ObjectId } from "../../lib/mongodb";
 
 export default async function handler(req, res) {
   try {
@@ -8,9 +8,10 @@ export default async function handler(req, res) {
       // connect to the database
       let { db } = await connectToDatabase();
       // fetch the posts
+      const formatIds = JSON.parse(req.body).map((e) => new ObjectId(e));
       let products = await db
         .collection("products")
-        .find({ _id: { $in: [...JSON.parse(req.body)] } })
+        .find({ _id: { $in: [...formatIds] } })
         .toArray();
       return res.json({
         data: products,

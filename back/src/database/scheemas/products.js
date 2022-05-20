@@ -12,6 +12,7 @@ var productScheema = new mongoose.Schema({
   priceHistory: Array,
   createdAt: Date,
   updatedAt: Date,
+  priceDiference: Number,
 });
 
 var ProductModel = mongoose.model("products", productScheema);

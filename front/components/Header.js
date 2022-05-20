@@ -24,9 +24,10 @@ import EuroIcon from "@mui/icons-material/Euro";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { importEstimate, removeEstimateInfo, setEstimatePriceType, setEstimateName } from "../features/user/userSlice";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import { exportToJsonFile } from "../utils/shared";
+import { exportToJsonFile, recalculateQuantities } from "../utils/shared";
 import { setNotification } from "../features/common/common";
 import { addToFavorites, getFavorites } from "../lib/pouchDatabase";
+import TimelineIcon from "@mui/icons-material/Timeline";
 const Header = () => {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -39,7 +40,7 @@ const Header = () => {
   const [openTimeFrame, setOpenTimeFrame] = React.useState(false);
   const handleOpenTimeFrame = () => setOpenTimeFrame(true);
   const handleCloseTimeFrame = () => setOpenTimeFrame(false);
-  const [timeFrame, setTimeFrame] = React.useState(estimate.type || "month");
+  const [timeFrame, setTimeFrame] = React.useState(estimate.type || "week");
   React.useEffect(() => {
     setNameEstimate(estimate.name);
   }, [estimate]);
@@ -164,8 +165,12 @@ const Header = () => {
             </div>
           </div>
           <div className={styles.container__actions}>
-            <Typography component="h2" variant="h5" style={{ display: "flex", alignItems: "center" }}>
-              Precio {typeSelected}: {estimate?.totalPrice || 0}
+            <Typography component="h2" variant="h5" style={{ display: "flex", alignItems: "center", margin: "0 30px 0 0" }}>
+              Precio Total: {estimate?.totalPrice || 0}
+              <EuroIcon />
+            </Typography>
+            <Typography component="h2" variant="h5" style={{ display: "flex", alignItems: "center", margin: "0 0 0 10px" }}>
+              Precio {typeSelected}: {recalculateQuantities(estimate.items, estimate.type) || 0}
               <EuroIcon />
             </Typography>
           </div>
@@ -201,12 +206,12 @@ const Header = () => {
               <p className={styles.item}>Buscar</p>
             </div>
           </div>
-          {/*           <div style={{ display: "flex", alignItems: "center" }} id="addProduct">
-            <div className={styles.link} onClick={(e) => handleRedirect(e, "/addProduct")}>
+          <div style={{ display: "flex", alignItems: "center" }} id="stadistics">
+            <div className={styles.link} onClick={(e) => handleRedirect(e, "/estadisticas")}>
               <TimelineIcon className="icon" />
               <p className={styles.item}>Estadisticas</p>
             </div>
-          </div> */}
+          </div>
         </div>
       </header>
       {/* Dialog Estimate Name */}
@@ -249,8 +254,8 @@ const Header = () => {
           >
             <MenuItem value={"week"}>Semanal</MenuItem>
             <MenuItem value={"month"}>Mensual</MenuItem>
-            <MenuItem value={"triMonth"}>Trimestral</MenuItem>
-            <MenuItem value={"year"}>Anual</MenuItem>
+            {/*             <MenuItem value={"triMonth"}>Trimestral</MenuItem>
+            <MenuItem value={"year"}>Anual</MenuItem> */}
           </Select>
           <FormHelperText>El precio será recalculado automáticamente.</FormHelperText>
         </DialogContent>
@@ -266,6 +271,4 @@ const Header = () => {
     </>
   );
 };
-// This gets called on every request
-
 export default Header;

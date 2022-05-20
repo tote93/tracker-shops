@@ -1,3 +1,4 @@
+const { ObjectId } = require("mongodb");
 const { formatDate, compareEqualDates, getDateDiffHours } = require("../utils");
 const { categoryModel } = require("./scheemas/categories");
 const { ProductModel } = require("./scheemas/products");
@@ -48,7 +49,9 @@ const createCategories = async (categories = DEFAULT_CATEGORIES) => {
     });
   }
 };
-
+const getDiffPrices = (p1, p2) => {
+  return (p1 - p2).toFixed(2);
+};
 const createUpdateProducts = async (list) => {
   const options = {
     upsert: true,
@@ -65,6 +68,7 @@ const createUpdateProducts = async (list) => {
         let prodDetails = {
           updatedAt: currDate,
           price: product.price,
+          priceDiference: getDiffPrices(result.price, product.price),
           priceHistory: [
             ...result.priceHistory,
             {
@@ -85,6 +89,7 @@ const createUpdateProducts = async (list) => {
         ...product,
         createdAt: currDate,
         updatedAt: currDate,
+        priceDiference: 0,
         priceHistory: [
           {
             price: product.price,
@@ -103,4 +108,44 @@ const createUpdateProducts = async (list) => {
   console.log(`Added ${list.length} products to database.`);
 };
 
-module.exports = { createCategories, createUpdateProducts };
+const updateProductDifference = async () => {
+  const options = {
+    upsert: true,
+    new: true,
+    setDefaultsOnInsert: true,
+  };
+  const data = await ProductModel.find();
+  for (let index = 0; index < data.length; index++) {
+    const element = data[index];
+    const price = getDiffPrices(element.price, element.priceHistory[element.priceHistory.length - 1].price);
+    let prodDetails = { priceDiference: price };
+    await ProductModel.findOneAndUpdate({ link: element.link }, prodDetails, options);
+  }
+  console.log("Finished...");
+};
+const updateProductsNoAttr = async () => {
+  const options = {
+    upsert: true,
+    new: true,
+    setDefaultsOnInsert: true,
+  };
+  const data = await ProductModel.find({ priceDiference: { $exists: false } });
+  for (let index = 0; index < data.length; index++) {
+    const element = data[index];
+    const iPrice = element.priceHistory.length > 1 ? element.priceHistory.length - 1 : 0;
+    const price = getDiffPrices(element.price, element.priceHistory[iPrice].price);
+    let prodDetails = { priceDiference: price };
+
+    ProductModel.findOneAndUpdate({ _id: element._id }, prodDetails, options, (error, result) => {
+      if (error) {
+        console.log("Existing document", prodDetails, error.message);
+        return;
+      } else {
+        console.log(result);
+      }
+    });
+  }
+  console.log("Finished...");
+};
+
+module.exports = { createCategories, updateProductDifference, createUpdateProducts, updateProductsNoAttr };

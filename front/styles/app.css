@@ -15,3 +15,12 @@
 .selected_path {
   border-bottom: 2px solid #fff;
 }
+
+.container_notification {
+  background: rgb(90, 173, 232);
+  color: #fff;
+  padding: 20px;
+  width: fit-content;
+  margin: 10px;
+  border-radius: 5px;
+}

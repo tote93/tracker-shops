@@ -1,4 +1,5 @@
 import { MongoClient } from "mongodb";
+export const ObjectId = require("mongodb").ObjectId;
 
 const MONGODB_URI = process.env.NEXT_PUBLIC_MONGODB_URI;
 const MONGODB_DB = process.env.NEXT_PUBLIC_DB_NAME;

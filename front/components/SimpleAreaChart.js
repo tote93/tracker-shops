@@ -1,7 +1,9 @@
 import React from "react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { getRandomColor } from "../utils/shared";
 
 export default function SimpleAreaChart({ chartData = [], wSize = "100%", hSize = 300, xValue = "x" }) {
+  const randColor = getRandomColor()
   return (
     <ResponsiveContainer width={wSize} height={hSize}>
       <AreaChart
@@ -19,7 +21,7 @@ export default function SimpleAreaChart({ chartData = [], wSize = "100%", hSize 
         <XAxis dataKey="name" />
         <YAxis />
         <Tooltip />
-        <Area type="monotone" dataKey={xValue} stroke="#8884d8" fill="#8884d8" />
+        <Area type="monotone" dataKey={xValue} stroke={randColor} fill={randColor} />
       </AreaChart>
     </ResponsiveContainer>
   );

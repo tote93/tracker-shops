@@ -2,7 +2,7 @@ import { Divider, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import styles from "../styles/MyList.module.css";
-import { calculatePriceQty, formatDate, getDiffPrices, getMaxSizeText, recalculatePriceTime } from "../utils/shared";
+import { calculatePriceQty, formatDate, getDiffPrices, getMaxSizeText, recalculatePriceTime, recalculateQuantities } from "../utils/shared";
 import EuroIcon from "@mui/icons-material/Euro";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
@@ -34,10 +34,11 @@ function MyList() {
     let itemsIds = [...new Set(estimate.items.map((e) => e._id))];
     const response = await fetch("api/getUserProducts", { method: "POST", body: JSON.stringify(itemsIds) });
     const data = await response.json();
+
     if (data.data.length) {
       //setuserProducts(data.data);
       const estimatePrice = calculatePriceQty(data.data, estimate.items);
-      setCurrentEstimatePrice(estimatePrice);
+      setCurrentEstimatePrice(+estimatePrice);
       const dataArray = [];
       estimate.items.map((prod) => {
         const estimatePrice = data.data.find((e) => e._id === prod._id);
@@ -46,19 +47,20 @@ function MyList() {
             ...data.data.find((e) => e._id === prod._id),
             estimatePrice: prod.price,
             difference: getDiffPrices(prod.price, estimatePrice.price),
+            qty: prod.qty,
+            frequency: prod.frequency,
           });
       });
-      console.log(dataArray, "---");
-      setEstimateData([...dataArray]);
-      const weekPriceData = recalculatePriceTime(estimatePrice, estimate.type, "week").toFixed(2);
-      const monthPriceData = recalculatePriceTime(estimatePrice, estimate.type, "month").toFixed(2);
-      const triMonthPriceData = recalculatePriceTime(estimatePrice, estimate.type, "triMonth").toFixed(2);
-      const yearPriceData = recalculatePriceTime(estimatePrice, estimate.type, "year").toFixed(2);
 
-      const estweekPriceData = recalculatePriceTime(estimate.totalPrice, estimate.type, "week").toFixed(2);
-      const estmonthPriceData = recalculatePriceTime(estimate.totalPrice, estimate.type, "month").toFixed(2);
-      const esttriMonthPriceData = recalculatePriceTime(estimate.totalPrice, estimate.type, "triMonth").toFixed(2);
-      const estyearPriceData = recalculatePriceTime(estimate.totalPrice, estimate.type, "year").toFixed(2);
+      setEstimateData([...dataArray]);
+      const weekPriceData = recalculateQuantities(dataArray, "week");
+      const monthPriceData = recalculateQuantities(dataArray, "month");
+      const triMonthPriceData = recalculateQuantities(dataArray, "triMonth");
+      const yearPriceData = recalculateQuantities(dataArray, "year");
+      const estweekPriceData = recalculatePriceTime(estimate.totalPrice, estimate.type, "week");
+      const estmonthPriceData = recalculatePriceTime(estimate.totalPrice, estimate.type, "month");
+      const esttriMonthPriceData = recalculatePriceTime(estimate.totalPrice, estimate.type, "triMonth");
+      const estyearPriceData = recalculatePriceTime(estimate.totalPrice, estimate.type, "year");
 
       setweekPrice(estweekPriceData);
       setmonthPrice(estmonthPriceData);
@@ -119,16 +121,16 @@ function MyList() {
   };
 
   /* Estimate price */
-  const [weekPrice, setweekPrice] = useState(recalculatePriceTime(estimate.totalPrice, estimate.type, "week"));
-  const [monthPrice, setmonthPrice] = useState(recalculatePriceTime(estimate.totalPrice, estimate.type, "month"));
-  const [triMonthPrice, settriMonthPrice] = useState(recalculatePriceTime(estimate.totalPrice, estimate.type, "triMonth"));
-  const [yearPrice, setyearPrice] = useState(recalculatePriceTime(estimate.totalPrice, estimate.type, "year"));
+  const [weekPrice, setweekPrice] = useState(recalculateQuantities(estimate.items, "week"));
+  const [monthPrice, setmonthPrice] = useState(recalculateQuantities(estimate.items, "month"));
+  const [triMonthPrice, settriMonthPrice] = useState(recalculateQuantities(estimate.items, "triMonth"));
+  const [yearPrice, setyearPrice] = useState(recalculateQuantities(estimate.items, "year"));
 
   /* Current Prices */
-  const [currWeekPrice, setcurrWeekPrice] = useState(recalculatePriceTime(currentEstimatePrice, estimate.type, "week").toFixed(2));
-  const [currMonthPrice, setcurrMonthPrice] = useState(recalculatePriceTime(currentEstimatePrice, estimate.type, "month").toFixed(2));
-  const [currTriMonthPrice, setcurrTriMonthPrice] = useState(recalculatePriceTime(currentEstimatePrice, estimate.type, "triMonth").toFixed(2));
-  const [currYearPrice, setcurrYearPrice] = useState(recalculatePriceTime(currentEstimatePrice, estimate.type, "year").toFixed(2));
+  const [currWeekPrice, setcurrWeekPrice] = useState(recalculateQuantities(estimate.items, "week"));
+  const [currMonthPrice, setcurrMonthPrice] = useState(recalculateQuantities(estimate.items, "month"));
+  const [currTriMonthPrice, setcurrTriMonthPrice] = useState(recalculateQuantities(estimate.items, "triMonth"));
+  const [currYearPrice, setcurrYearPrice] = useState(recalculateQuantities(estimate.items, "year"));
 
   const [barChartData, setBarChartData] = useState([
     {
@@ -174,22 +176,22 @@ function MyList() {
   };
 
   const getItemFromEstimate = (item) => {
-    const found = estimate.items.find((i) => i._id === item._id);
+    const found = estimate.items.find((prod) => prod._id === item._id);
     if (found) return found.qty;
     else return 0;
   };
-  const getTimeLabel = () => {
+  const getTimeLabel = (freq) => {
     let label = "Semanal";
-    switch (estimate.type) {
+    switch (freq) {
       case "month":
         label = "Mensual";
         break;
-      case "trimonth":
+      /*       case "trimonth":
         label = "Trimestral";
         break;
       case "year":
         label = "Anual";
-        break;
+        break; */
       default:
         break;
     }
@@ -197,8 +199,8 @@ function MyList() {
   };
   const deleteProducts = (data, type) => {
     try {
-      if (type === "all") dispatch(removeAllTypeProducts(data._id));
-      else dispatch(deleteProduct(data._id));
+      if (type === "all") dispatch(removeAllTypeProducts({ _id: data._id, frequency: data.frequency }));
+      else dispatch(deleteProduct({ _id: data._id, frequency: data.frequency }));
       dispatch(setNotification({ severity: "success", title: `Producto eliminado de la lista.`, duration: 2000 }));
     } catch (error) {
       dispatch(setNotification({ severity: "error", title: `Error ${error.message}.` }));
@@ -210,10 +212,10 @@ function MyList() {
         <div style={{ flex: "0.5" }}>
           <div>
             <div className={styles.listHeaderInfo}>
-              <Typography component="h3" variant="p">
+              <Typography component="h3" variant="h5">
                 {estimate.name}
               </Typography>
-              <Typography component="h3" variant="p">
+              <Typography component="h3" variant="h5">
                 Productos: {estimate.items.length}
               </Typography>
             </div>
@@ -248,15 +250,12 @@ function MyList() {
                   <Typography component="h4" variant="p">
                     Precio Semanal: {currWeekPrice} <EuroIcon style={{ fontSize: "1rem" }} />
                   </Typography>
-
                   <Typography component="h4" variant="p">
                     Precio Mensual: {currMonthPrice} <EuroIcon style={{ fontSize: "1rem" }} />
                   </Typography>
-
                   <Typography component="h4" variant="p">
                     Precio Trimestral: {currTriMonthPrice} <EuroIcon style={{ fontSize: "1rem" }} />
                   </Typography>
-
                   <Typography component="h4" variant="p">
                     Precio Anual: {currYearPrice} <EuroIcon style={{ fontSize: "1rem" }} />
                   </Typography>
@@ -287,14 +286,19 @@ function MyList() {
                 render: (rowData) => <div className={styles.rowTable}>{getMaxSizeText(rowData.title, 100)}</div>,
               },
               {
-                title: `Cantidad ${getTimeLabel()}`,
+                title: `Cantidad`,
                 field: "qty",
-                render: (rowData) => <div className={styles.rowTable}>{getItemFromEstimate(rowData) || 0}</div>,
+                render: (rowData) => <div className={styles.rowTable}>{rowData.qty || 0}</div>,
+              },
+              {
+                title: `Frecuencia`,
+                field: "frequency",
+                render: (rowData) => <div className={styles.rowTable}>{getTimeLabel(rowData.frequency)}</div>,
               },
               {
                 title: "Precio Unitario",
                 field: "estimatePrice",
-                render: (rowData) => <div className={styles.rowTable}>{rowData.estimatePrice} €</div>,
+                render: (rowData) => <div className={styles.rowTable}>{rowData.estimatePrice.toFixed(2)} €</div>,
               },
               {
                 title: "Precio Lista",
@@ -333,7 +337,8 @@ function MyList() {
             data={estimateData}
             style={{ width: "100%" }}
             options={{
-              sorting: false,
+              sorting: true,
+              ordering: false,
               maxBodyHeight: "80vh",
               actionsColumnIndex: -1,
             }}

@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     // connect to the database
     let { db } = await connectToDatabase();
     // fetch the posts
-    let posts = await db.collection("categories").find({}).sort({ published: -1 }).toArray();
+    let posts = await db.collection("categories").find({}).sort({ updatedAt: -1 }).toArray();
     // return the posts
     return res.json({
       message: JSON.parse(JSON.stringify(posts)),

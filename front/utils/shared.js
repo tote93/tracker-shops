@@ -114,10 +114,27 @@ export const getDiffPrices = (p1, p2) => {
 
 export const countNumProducts = (array, id) => {
   const response = array.filter((e) => e._id === id);
-
-  return response.length > 0 ? response[0].qty : 0;
+  let qty = 0;
+  response.map((prod) => (qty += prod.qty));
+  return qty;
 };
 
+export const recalculateQuantities = (items, time) => {
+  let weekly = 0;
+  let monthly = 0;
+  let triMonthly = 0;
+  let yearly = 0;
+  items.forEach((prod) => {
+    if (prod.frequency === "week") weekly += prod.totalPrice;
+    else if (prod.frequency === "month") monthly += prod.totalPrice;
+    else if (prod.frequency === "trimonth") triMonthly += prod.totalPrice;
+    else if (prod.frequency === "year") yearly += prod.totalPrice;
+  });
+  if (time === "week") return weekly;
+  else if (time === "month") return weekly + monthly;
+  else if (time === "trimonth") return (weekly + monthly) * 3;
+  else if (time === "year") return (weekly + monthly) * 12;
+};
 export const recalculatePriceTime = (price = 0, oldTime, newTime) => {
   let returnPrice = +price;
   if (oldTime === newTime) returnPrice = price;
@@ -140,7 +157,11 @@ export const recalculatePriceTime = (price = 0, oldTime, newTime) => {
       else if (newTime === "year") returnPrice = price * 4 * 12;
     } else returnPrice = price;
   }
-  return +returnPrice;
+  return +returnPrice.toFixed(2);
+};
+export const getRandomColor = () => {
+  var randomColor = Math.floor(Math.random() * 16777215).toString(16);
+  return "#" + randomColor;
 };
 export const calculatePriceQty = (array, estimate) => {
   let price = 0;
@@ -164,3 +185,9 @@ export function exportToJsonFile(jsonData) {
   linkElement.setAttribute("download", exportFileDefaultName);
   linkElement.click();
 }
+export const getDateDifference = (product) => {
+  var fecha1 = moment(product.priceHistory[0].dateTime);
+  var fecha2 = moment(product.priceHistory[product.priceHistory.length - 1].dateTime);
+
+  return fecha2.diff(fecha1, "days");
+};
