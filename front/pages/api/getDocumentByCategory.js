@@ -7,9 +7,9 @@ export default async function handler(req, res) {
     // connect to the database
     let { db } = await connectToDatabase();
     // fetch the posts
-    const filtering = req.body !== "all" ? { features: req.body } : {};
-    let posts = await db.collection("products").find(filtering).sort({ updatedAt: -1 }).toArray();
-    
+    const filtering = req.body !== "all" ? { features: req.body.toLowerCase().normalize("NFD") } : {};
+    let posts = await db.collection("market_products").find(filtering).sort({ updatedAt: -1 }).toArray();
+
     // return the posts
     return res.json({
       data: JSON.parse(JSON.stringify(posts)),

@@ -24,8 +24,11 @@ const Layout = ({ children }) => {
       case "/search":
         if (document.querySelector("#search")) document.querySelector("#search").classList.add("selected_path");
         break;
-      case "/favorites":
+      case "/favoritos":
         if (document.querySelector("#favorites")) document.querySelector("#favorites").classList.add("selected_path");
+        break;
+      case "/estadisticas":
+        if (document.querySelector("#stadistics")) document.querySelector("#stadistics").classList.add("selected_path");
         break;
       default:
         if (document.querySelector("#categories")) document.querySelector("#categories").classList.add("selected_path");

@@ -195,7 +195,7 @@ const Header = () => {
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "center" }} id="favorites">
-            <div className={styles.link} onClick={(e) => handleRedirect(e, "/favorites")}>
+            <div className={styles.link} onClick={(e) => handleRedirect(e, "/favoritos")}>
               <FavoriteIcon className="icon" />
               <p className={styles.item}>Mis Favoritos</p>
             </div>

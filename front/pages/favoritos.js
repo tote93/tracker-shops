@@ -7,10 +7,11 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { useDispatch } from "react-redux";
 import { importEstimate } from "../features/user/userSlice";
 import { setNotification } from "../features/common/common";
+import { useRouter } from "next/router";
 function favorites() {
   const [favoritesItem, setFavoritesItem] = useState([]);
   const dispatch = useDispatch();
-
+  const router = useRouter();
   React.useEffect(() => {
     const getAllFavorites = async () => {
       const data = await getFavorites();
@@ -21,6 +22,7 @@ function favorites() {
   const importFavoriteItem = (item) => {
     dispatch(importEstimate(item));
     dispatch(setNotification({ severity: "success", title: `Importado con exito.`, duration: 2000 }));
+    router.push("/");
   };
   const removeFromFavorites = async (item) => {
     const response = await removeUserProductDB(item._id);
@@ -32,9 +34,9 @@ function favorites() {
   };
   return (
     <div className={styles.root}>
-      {favoritesItem.map((fav) => {
+      {favoritesItem.map((fav, i) => {
         return (
-          <div className={styles.favContainer}>
+          <div key={fav.name + "-" + i} className={styles.favContainer}>
             <div className={styles.favTitle}>
               <Typography component="h3" variant="p">
                 {fav.name}

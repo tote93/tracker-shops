@@ -10,7 +10,7 @@ export default async function handler(req, res) {
       // fetch the posts
       const formatIds = JSON.parse(req.body).map((e) => new ObjectId(e));
       let products = await db
-        .collection("products")
+        .collection("market_products")
         .find({ _id: { $in: [...formatIds] } })
         .toArray();
       return res.json({

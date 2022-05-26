@@ -63,9 +63,6 @@
   cursor: pointer;
   margin: 0;
 }
-.item:hover {
-  text-decoration: underline;
-}
 
 .icon {
   margin-right: 0.25rem;

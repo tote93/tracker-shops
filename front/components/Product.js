@@ -19,7 +19,6 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 export default function Product({ product }) {
-  const [componentProduct, setComponentProduct] = useState(product);
   const estimate = useSelector((state) => state.user.estimateInfo);
   const [numProducts, setNumProducts] = useState(null);
   const [viewProductInfo, setViewProductInfo] = useState(false);
@@ -32,14 +31,14 @@ export default function Product({ product }) {
 
   const dispatch = useDispatch();
   const openNewURL = () => {
-    window.open(componentProduct.link, "_blank");
+    window.open(product.link, "_blank");
   };
 
   const addProductToBasket = (targetType) => {
     let updateProductQty = { ...product, qty: 1, frequency: targetType, totalPrice: product.price };
     try {
       dispatch(addNewProduct(updateProductQty));
-      dispatch(setNotification({ severity: "success", title: `Añadido ${getMaxSizeText(componentProduct.title, 20)} a ${estimate.name}.`, duration: 2000 }));
+      dispatch(setNotification({ severity: "success", title: `Añadido ${getMaxSizeText(product.title, 20)} a ${estimate.name}.`, duration: 2000 }));
     } catch (error) {
       dispatch(setNotification({ severity: "error", title: `Error ${error.message}.` }));
     }
@@ -76,34 +75,35 @@ export default function Product({ product }) {
                 </Tooltip>
               </div>
             }
-            avatar={<Avatar aria-label="product" className={styles.avatar} src={getImageProduct(componentProduct.img)} />}
-            title={<Tooltip title={componentProduct.title}><span>{getMaxSizeText(componentProduct.title, 30)}</span></Tooltip>}
+            avatar={<Avatar aria-label="product" className={styles.avatar} src={getImageProduct(product.img)} />}
+            title={
+              <Tooltip title={product.title}>
+                <span>{getMaxSizeText(product.title, 30)}</span>
+              </Tooltip>
+            }
           />
-          <Tooltip title={`Ver producto en tienda.`}>
-            <CardMedia className={styles.media} onClick={openNewURL} image={componentProduct.img} />
+          <Tooltip title={product.title}>
+            <CardMedia className={styles.media} image={product.img} />
           </Tooltip>
           <CardContent className={styles.priceContent}>
             <div style={{ width: "100%" }}>
               <Typography variant="p" component="h3">
-                Precio Actual:{" "}
-                <span className={styles.price}>
-                  {componentProduct.price}
-                  {componentProduct.currency}
-                </span>
+                Precio Actual: <span className={styles.price}>{product.info.priceDetails}</span>{" "}
+                <span className={styles.priceEqual}>{product.info.prod_quantity ? "(" + product.info.prod_quantity + ")" : ""}</span>
               </Typography>
             </div>
             <div style={{ width: "100%" }}>
               <Typography variant="p" component="h3">
                 Último Precio Registrado:{" "}
-                {componentProduct.priceHistory.length > 1 ? (
+                {product.priceHistory.length > 1 ? (
                   <span className={styles.price}>
-                    {componentProduct.priceHistory[componentProduct.priceHistory.length - 2].price}
-                    {componentProduct.currency}
+                    {product.priceHistory[product.priceHistory.length - 2].price}
+                    {product.currency}
                   </span>
                 ) : (
                   <span className={styles.price}>
-                    {componentProduct.price}
-                    {componentProduct.currency}
+                    {product.price}
+                    {product.currency}
                   </span>
                 )}
               </Typography>
@@ -111,21 +111,22 @@ export default function Product({ product }) {
             <div style={{ width: "100%" }}>
               <Typography variant="p" component="h3" style={{ display: "flex", alignItems: "center" }}>
                 Variación:{" "}
-                {componentProduct.priceHistory.length > 1 ? (
-                  <span className={componentProduct.priceDiference > 0 ? styles.price : styles.priceOut} style={{ display: "flex", alignItems: "center" }}>
-                    {componentProduct.priceDiference > 0 ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />}
-                    {componentProduct.priceDiference < 0 ? -1 * componentProduct.priceDiference : componentProduct.priceDiference}
-                    {componentProduct.currency}
+                {product.priceHistory.length > 1 ? (
+                  <span className={product.priceDiference > 0 ? styles.price : styles.priceOut} style={{ display: "flex", alignItems: "center" }}>
+                    {product.priceDiference > 0 ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />}
+                    {product.priceDiference < 0 ? -1 * product.priceDiference : product.priceDiference}
+                    {product.currency}
                   </span>
                 ) : (
                   <span className={styles.priceEqual} style={{ display: "flex", alignItems: "center" }}>
-                    <DragHandleIcon />0{componentProduct.currency}
+                    <DragHandleIcon />0{product.currency}
                   </span>
                 )}
               </Typography>
+              <Typography variant="p" component="h3" style={{ display: "flex", alignItems: "center" }}></Typography>
             </div>
             <Typography variant="p" component="p">
-              Actualizado: <span>{formatDate(componentProduct.updatedAt)}</span>
+              Actualizado: <span>{formatDate(product.updatedAt)}</span>
             </Typography>
           </CardContent>
         </CardActionArea>

@@ -9,7 +9,7 @@ export default async function handler(req, res) {
     // fetch the posts
 
     let products = await db
-      .collection("products")
+      .collection("market_products")
       .find({ price: { $ne: 0 } })
       .sort({ priceDiference: 1 })
       .limit(30)

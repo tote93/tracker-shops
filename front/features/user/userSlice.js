@@ -4,70 +4,64 @@ export const userAccount = createSlice({
   initialState: {
     //estimateInfo: { name: "Mi Lista de Compra", items: [], totalPrice: 0, type: "week" },
     estimateInfo: {
-      name: "Mi Lista de Compra",
+      name: "Listado compra",
       items: [
         {
-          _id: "6283b14cd7a26d49e20ba0e0",
-          link: "https://www.carrefour.es/supermercado/cerveza-mahou-5-estrellas-especial-pack-de-28-latas-de-33-cl/R-520661305/p",
-          createdAt: "2022-05-09T08:56:00.000Z",
+          _id: "628e739cf5d50db6aa53dd70",
+          title: "Floralys Papel higiénico",
+          link: "https://lolamarket.com/es/es/tienda/lidl/limpieza-y-hogar/limpieza-del-hogar/",
+          price: 4.79,
           currency: "€",
-          features: ["Bebidas"],
-          img: "https://static.carrefour.es/hd_350x_/img_pim_food/718560_00_1.jpg",
-          price: 13.8,
-          priceHistory: [
-            {
-              price: 17.75,
-              dateTime: "2022-05-09 10:56",
-            },
-            {
-              price: 17.75,
-              dateTime: "2022-05-15 12:08",
-            },
-            {
-              price: 13.8,
-              dateTime: "2022-05-18 16:30",
-            },
-          ],
-          title: "Cerveza Mahou 5 Estrellas especial pack de 28 latas de 33 cl.",
-          unitPrice: 1.92,
-          updatedAt: "2022-05-18T14:30:00.000Z",
-          priceDiference: 3.95,
-          qty: 2,
+          img: "https://d2ohdpvxj0yo9f.cloudfront.net/products/hi/higienico-3-capas-de-lidl0-1647679307_s.jpg",
+          features: ["superMercado", "limpieza", "hogar"],
+          priceHistory: [{ price: 4.79, dateTime: "2022-05-25 20:21" }],
+          createdAt: "2022-05-25T18:21:00.000Z",
+          updatedAt: "2022-05-25T18:21:00.000Z",
+          priceDiference: 0,
+          info: { addicionalInfo: "4,79 € / ud", priceDetails: "4,79 € / ud", prod_quantity: "12 rollos x 160 servicios" },
+          __v: 0,
+          qty: 3,
           frequency: "month",
-          totalPrice: 27.6,
+          totalPrice: 14.370000000000001,
         },
         {
-          _id: "6283b14cd7a26d49e20ba0e0",
-          link: "https://www.carrefour.es/supermercado/cerveza-mahou-5-estrellas-especial-pack-de-28-latas-de-33-cl/R-520661305/p",
-          createdAt: "2022-05-09T08:56:00.000Z",
+          _id: "628e739cf5d50db6aa53dd76",
+          title: "Floralys Servilletas 1 capa",
+          link: "https://lolamarket.com/es/es/tienda/lidl/limpieza-y-hogar/limpieza-del-hogar/",
+          price: 1,
           currency: "€",
-          features: ["Bebidas"],
-          img: "https://static.carrefour.es/hd_350x_/img_pim_food/718560_00_1.jpg",
-          price: 13.8,
-          priceHistory: [
-            {
-              price: 17.75,
-              dateTime: "2022-05-09 10:56",
-            },
-            {
-              price: 17.75,
-              dateTime: "2022-05-15 12:08",
-            },
-            {
-              price: 13.8,
-              dateTime: "2022-05-18 16:30",
-            },
-          ],
-          title: "Cerveza Mahou 5 Estrellas especial pack de 28 latas de 33 cl.",
-          unitPrice: 1.92,
-          updatedAt: "2022-05-18T14:30:00.000Z",
-          priceDiference: 3.95,
-          qty: 2,
+          img: "https://d2ohdpvxj0yo9f.cloudfront.net/products/se/servilletas-1-capa-de-lidl0-1647679251_s.jpg",
+          features: ["superMercado", "limpieza", "hogar"],
+          priceHistory: [{ price: 1, dateTime: "2022-05-25 20:21" }],
+          createdAt: "2022-05-25T18:21:00.000Z",
+          updatedAt: "2022-05-25T18:21:00.000Z",
+          priceDiference: 0,
+          info: { addicionalInfo: "1 € / ud", priceDetails: "1 € / ud", prod_quantity: "200 uds" },
+          __v: 0,
+          qty: 1,
           frequency: "week",
-          totalPrice: 27.6,
+          totalPrice: 1,
+        },
+        {
+          _id: "628e739cf5d50db6aa53dd73",
+          title: "W5 Lejía con detergente",
+          link: "https://lolamarket.com/es/es/tienda/lidl/limpieza-y-hogar/limpieza-del-hogar/",
+          price: 1.05,
+          currency: "€",
+          img: "https://d2ohdpvxj0yo9f.cloudfront.net/products/le/lejia-detergente-de-lidl0-1647677046_s.jpg",
+          features: ["superMercado", "limpieza", "hogar"],
+          priceHistory: [{ price: 1.05, dateTime: "2022-05-25 20:21" }],
+          createdAt: "2022-05-25T18:21:00.000Z",
+          updatedAt: "2022-05-25T18:21:00.000Z",
+          priceDiference: 0,
+          info: { addicionalInfo: "1,05 € / ud, 0,53 € / L", priceDetails: "1,05 € / ud", prod_quantity: "2 l" },
+          __v: 0,
+          qty: 1,
+          frequency: "week",
+          totalPrice: 1.05,
         },
       ],
-      totalPrice: 55.2,
+      totalPrice: 71.77,
       type: "week",
     },
   },
@@ -104,7 +98,6 @@ export const userAccount = createSlice({
 
           state.estimateInfo.items = [...filtered];
         } else {
-          console.log("---", JSON.parse(JSON.stringify(state.estimateInfo.items)));
           const filtered = [];
           state.estimateInfo.items.forEach((prod) => {
             if (prod._id !== action.payload._id) filtered.push(prod);
@@ -115,7 +108,6 @@ export const userAccount = createSlice({
               filtered.push(product);
             }
           });
-          console.log("filtered", JSON.parse(JSON.stringify(filtered)));
           state.estimateInfo.items = [...filtered];
         }
         state.estimateInfo.totalPrice = recalculateTotalPrice(state.estimateInfo.items);

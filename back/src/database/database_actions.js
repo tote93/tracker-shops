@@ -2,6 +2,7 @@ const { ObjectId } = require("mongodb");
 const { formatDate, compareEqualDates, getDateDiffHours } = require("../utils");
 const { categoryModel } = require("./scheemas/categories");
 const { ProductModel } = require("./scheemas/products");
+const { LolaProductModel } = require("./scheemas/lolaproducts");
 const DEFAULT_CATEGORIES = [
   "Supermercado",
   "Bebidas",
@@ -58,11 +59,12 @@ const createUpdateProducts = async (list) => {
     new: true,
     setDefaultsOnInsert: true,
   };
-
+  let updated = 0;
+  let created = 0;
   for (let index = 0; index < list.length; index++) {
     const product = list[index];
     const currDate = formatDate(new Date());
-    const result = await ProductModel.findOne({ link: product.link });
+    const result = await ProductModel.findOne({ $or: [{ img: product.img }, { title: product.title }, { link: product.link }] });
     if (result) {
       if (getDateDiffHours(result.updatedAt, currDate) >= 6) {
         let prodDetails = {
@@ -84,6 +86,7 @@ const createUpdateProducts = async (list) => {
           }
         });
       }
+      updated += 1;
     } else {
       let prodDetails = new ProductModel({
         ...product,
@@ -103,9 +106,10 @@ const createUpdateProducts = async (list) => {
           return;
         }
       });
+      created += 1;
     }
   }
-  console.log(`Added ${list.length} products to database.`);
+  console.log(`Added ${created}, updated: ${updated} from ${list.length} products`);
 };
 
 const updateProductDifference = async () => {
@@ -148,4 +152,87 @@ const updateProductsNoAttr = async () => {
   console.log("Finished...");
 };
 
-module.exports = { createCategories, updateProductDifference, createUpdateProducts, updateProductsNoAttr };
+const removeOlderThanDays = async (days = 7) => {
+  try {
+    const data = await ProductModel.aggregate([
+      {
+        $match: {
+          $expr: {
+            $lt: ["$updatedAt", { $dateSubtract: { startDate: "$$NOW", unit: "day", amount: days } }],
+          },
+        },
+      },
+    ]);
+    console.log(`Found ${data.length} products older than ${days} days.`);
+    /*     for (let index = 0; index < data.length; index++) {
+      const element = data[index];
+      const res = await ProductModel.remove({ _id: element._id });
+      if (res.deletedCount) console.log("Deleted", element.title);
+      else console.log("Not possible delete", element._id, element.title);
+    } */
+  } catch (error) {
+    console.log("ERROR", error.message);
+  }
+};
+
+const createUpdateLolaProducts = async (list) => {
+  const options = {
+    upsert: true,
+    new: true,
+    setDefaultsOnInsert: true,
+  };
+  let updated = 0;
+  let created = 0;
+  for (let index = 0; index < list.length; index++) {
+    const product = list[index];
+    const currDate = formatDate(new Date());
+    const result = await LolaProductModel.findOne({ title: product.title });
+
+    if (result) {
+      if (getDateDiffHours(result.updatedAt, currDate) >= 6) {
+        let prodDetails = {
+          updatedAt: currDate,
+          price: product.price,
+          priceDiference: getDiffPrices(result.price, product.price),
+          priceHistory: [
+            ...result.priceHistory,
+            {
+              price: product.price,
+              dateTime: currDate,
+            },
+          ],
+        };
+        await LolaProductModel.findOneAndUpdate({ title: product.title }, prodDetails, options, (error, result) => {
+          if (error) {
+            console.log("Existing document", prodDetails, error.message);
+            return;
+          }
+          if (result) updated += 1;
+        });
+      }
+    } else {
+      let prodDetails = new LolaProductModel({
+        ...product,
+        createdAt: currDate,
+        updatedAt: currDate,
+        priceDiference: 0,
+        priceHistory: [
+          {
+            price: product.price,
+            dateTime: currDate,
+          },
+        ],
+      });
+
+      await LolaProductModel.create(prodDetails, (error, result) => {
+        if (error) {
+          console.log("NO Existing document", prodDetails, error.message);
+          return;
+        } else created += 1;
+      });
+    }
+  }
+  console.log(`Added ${created}, updated: ${updated} from ${list.length} products`);
+};
+
+module.exports = { createUpdateLolaProducts, createCategories, updateProductDifference, createUpdateProducts, updateProductsNoAttr, removeOlderThanDays };

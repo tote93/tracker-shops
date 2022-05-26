@@ -2,7 +2,7 @@ import { Divider, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import styles from "../styles/MyList.module.css";
-import { calculatePriceQty, formatDate, getDiffPrices, getMaxSizeText, recalculatePriceTime, recalculateQuantities } from "../utils/shared";
+import { formatDate, getDiffPrices, getMaxSizeText, recalculateQuantities } from "../utils/shared";
 import EuroIcon from "@mui/icons-material/Euro";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
@@ -37,30 +37,39 @@ function MyList() {
 
     if (data.data.length) {
       //setuserProducts(data.data);
+      /*       ´
       const estimatePrice = calculatePriceQty(data.data, estimate.items);
-      setCurrentEstimatePrice(+estimatePrice);
+      setCurrentEstimatePrice(+estimatePrice); 
+      */
+
       const dataArray = [];
+
       estimate.items.map((prod) => {
-        const estimatePrice = data.data.find((e) => e._id === prod._id);
-        if (estimatePrice)
+        const productElement = data.data.find((e) => e._id === prod._id);
+        if (productElement) {
           dataArray.push({
-            ...data.data.find((e) => e._id === prod._id),
-            estimatePrice: prod.price,
-            difference: getDiffPrices(prod.price, estimatePrice.price),
+            ...productElement,
+            estimatePrice: productElement.price,
+            difference: getDiffPrices(prod.price, productElement.price),
             qty: prod.qty,
+            totalPrice: prod.price,
             frequency: prod.frequency,
           });
+        }
       });
 
       setEstimateData([...dataArray]);
-      const weekPriceData = recalculateQuantities(dataArray, "week");
-      const monthPriceData = recalculateQuantities(dataArray, "month");
-      const triMonthPriceData = recalculateQuantities(dataArray, "triMonth");
-      const yearPriceData = recalculateQuantities(dataArray, "year");
-      const estweekPriceData = recalculatePriceTime(estimate.totalPrice, estimate.type, "week");
-      const estmonthPriceData = recalculatePriceTime(estimate.totalPrice, estimate.type, "month");
-      const esttriMonthPriceData = recalculatePriceTime(estimate.totalPrice, estimate.type, "triMonth");
-      const estyearPriceData = recalculatePriceTime(estimate.totalPrice, estimate.type, "year");
+
+      const weekPriceData = recalculateQuantities(dataArray, "week", "estimatePrice");
+      const monthPriceData = recalculateQuantities(dataArray, "month", "estimatePrice");
+      const triMonthPriceData = recalculateQuantities(dataArray, "triMonth", "estimatePrice");
+      const yearPriceData = recalculateQuantities(dataArray, "year", "estimatePrice");
+
+      /*  estimate data */
+      const estweekPriceData = recalculateQuantities(dataArray, "week");
+      const estmonthPriceData = recalculateQuantities(dataArray, "month");
+      const esttriMonthPriceData = recalculateQuantities(dataArray, "triMonth");
+      const estyearPriceData = recalculateQuantities(dataArray, "year");
 
       setweekPrice(estweekPriceData);
       setmonthPrice(estmonthPriceData);
@@ -76,6 +85,7 @@ function MyList() {
           name: "Semanal",
           "Precio Actual": weekPriceData,
           "Precio mi lista": estweekPriceData,
+          unit: "kg",
         },
         {
           name: "Mensual",
@@ -121,16 +131,16 @@ function MyList() {
   };
 
   /* Estimate price */
-  const [weekPrice, setweekPrice] = useState(recalculateQuantities(estimate.items, "week"));
-  const [monthPrice, setmonthPrice] = useState(recalculateQuantities(estimate.items, "month"));
-  const [triMonthPrice, settriMonthPrice] = useState(recalculateQuantities(estimate.items, "triMonth"));
-  const [yearPrice, setyearPrice] = useState(recalculateQuantities(estimate.items, "year"));
+  const [weekPrice, setweekPrice] = useState(0);
+  const [monthPrice, setmonthPrice] = useState(0);
+  const [triMonthPrice, settriMonthPrice] = useState(0);
+  const [yearPrice, setyearPrice] = useState(0);
 
   /* Current Prices */
-  const [currWeekPrice, setcurrWeekPrice] = useState(recalculateQuantities(estimate.items, "week"));
-  const [currMonthPrice, setcurrMonthPrice] = useState(recalculateQuantities(estimate.items, "month"));
-  const [currTriMonthPrice, setcurrTriMonthPrice] = useState(recalculateQuantities(estimate.items, "triMonth"));
-  const [currYearPrice, setcurrYearPrice] = useState(recalculateQuantities(estimate.items, "year"));
+  const [currWeekPrice, setcurrWeekPrice] = useState(0);
+  const [currMonthPrice, setcurrMonthPrice] = useState(0);
+  const [currTriMonthPrice, setcurrTriMonthPrice] = useState(0);
+  const [currYearPrice, setcurrYearPrice] = useState(0);
 
   const [barChartData, setBarChartData] = useState([
     {
@@ -243,7 +253,7 @@ function MyList() {
               </div>
               <div className={styles.listHeaderDateCurrent}>
                 <Typography component="h3" variant="p">
-                  Precio Actual: {formatDate(new Date().toDateString(), "hh:mm DD-MM-YYYY")}
+                  Precio Actual: {formatDate(new Date().toDateString(), "DD-MM-YYYY")}
                 </Typography>
                 <Divider />
                 <div>
@@ -278,7 +288,7 @@ function MyList() {
                 title: "Imagen",
                 field: "img",
                 sorting: false,
-                render: (rowData) => <img alt="Product" src={rowData.img} style={{ width: 120, objectFit: "contain" }} />,
+                render: (rowData) => <img alt="Product" src={rowData.img} style={{ height: 120, width: 120, objectFit: "contain" }} />,
               },
               {
                 title: "Producto",
@@ -296,19 +306,24 @@ function MyList() {
                 render: (rowData) => <div className={styles.rowTable}>{getTimeLabel(rowData.frequency)}</div>,
               },
               {
-                title: "Precio Unitario",
+                title: "Precio/ud Tienda",
                 field: "estimatePrice",
                 render: (rowData) => <div className={styles.rowTable}>{rowData.estimatePrice.toFixed(2)} €</div>,
               },
               {
-                title: "Precio Lista",
-                field: "estimatePrice",
-                render: (rowData) => <div className={styles.rowTable}>{(getItemFromEstimate(rowData) * rowData.estimatePrice).toFixed(2)} €</div>,
+                title: "Precio/ud Lista",
+                field: "totalPrice",
+                render: (rowData) => <div className={styles.rowTable}>{(getItemFromEstimate(rowData) * rowData.totalPrice).toFixed(2)} €</div>,
               },
               {
-                title: "Precio Actual",
+                title: "Precio Total Tienda",
                 field: "price",
                 render: (rowData) => <div className={styles.rowTable}>{(getItemFromEstimate(rowData) * rowData.price).toFixed(2)} €</div>,
+              },
+              {
+                title: "Precio Total Lista",
+                field: "price",
+                render: (rowData) => <div className={styles.rowTable}>{(getItemFromEstimate(rowData) * rowData.totalPrice).toFixed(2)} €</div>,
               },
               {
                 title: "Diferencia",
@@ -374,43 +389,4 @@ function MyList() {
   );
 }
 
-export default MyList; /* 
-export async function getServerSideProps({ req, res }) {
-  console.log("Triggered server");
-  res.setHeader("Cache-Control", "public, s-maxage=10, stale-while-revalidate=59");
-let dev = process.env.NEXT_PUBLIC_NODE_ENV !== "production";
-  let { NEXT_PUBLIC_DEV_URL, NEXT_PUBLIC_PROD_URL } = process.env;
-  if (dev) {
-    let response = await fetch(`${dev ? NEXT_PUBLIC_DEV_URL : NEXT_PUBLIC_DEV_URL}/api/categories`);
-    // extract the data
-    let categories = await response.json();
-    let categoryCountObj = {};
-    for (let index = 0; index < categories.message.length; index++) {
-      const element = categories.message[index];
-      let responseCat = await fetch(`${dev ? NEXT_PUBLIC_DEV_URL : NEXT_PUBLIC_DEV_URL}/api/getDocumentByCategory`, {
-        method: "POST",
-        body: element.name,
-      });
-
-      let category = await responseCat.json();
-      categoryCountObj[element.name] = category.data.length;
-    }
-    let responseProd = await fetch(`${dev ? NEXT_PUBLIC_DEV_URL : NEXT_PUBLIC_DEV_URL}/api/products`);
-    //let products = { message: [] }; //await responseProd.json();
-    let products = await responseProd.json();
-    // Pass data to the page via props
-    return { props: { categories: categories.message, products: products.message, count: products.count, categoryProducts: categoryCountObj } };
-  } else {
-    let response = await fetch(`${dev ? NEXT_PUBLIC_DEV_URL : NEXT_PUBLIC_DEV_URL}/api/categories`);
-    // extract the data
-    let categories = await response.json();
-
-    let responseProd = await fetch(`${dev ? NEXT_PUBLIC_DEV_URL : NEXT_PUBLIC_DEV_URL}/api/products`);
-    //let products = { message: [] }; //await responseProd.json();
-    let products = await responseProd.json();
-    // Pass data to the page via props
-    return { props: { categories: categories.message, products: products.message, count: products.count } };
-  } 
-  // request posts from api
-}
-*/
+export default MyList;

@@ -4,7 +4,8 @@ export const getFormattedPrice = (price) => {
   return Number(price.replace(/[^\d(.|,)-]/g, "").replace(",", "."));
 };
 
-export const getMaxSizeText = (str, numChars) => {
+export const getMaxSizeText = (str, numChars = 80) => {
+  if (str.length < numChars) return str;
   return str.substring(0, numChars) + "...";
 };
 
@@ -119,21 +120,22 @@ export const countNumProducts = (array, id) => {
   return qty;
 };
 
-export const recalculateQuantities = (items, time) => {
+export const recalculateQuantities = (items, time, attr = "totalPrice") => {
   let weekly = 0;
   let monthly = 0;
   let triMonthly = 0;
   let yearly = 0;
   items.forEach((prod) => {
-    if (prod.frequency === "week") weekly += prod.totalPrice;
-    else if (prod.frequency === "month") monthly += prod.totalPrice;
-    else if (prod.frequency === "trimonth") triMonthly += prod.totalPrice;
-    else if (prod.frequency === "year") yearly += prod.totalPrice;
+    if (prod.frequency === "week") weekly += +prod[attr] * prod.qty;
+    else if (prod.frequency === "month") monthly += +prod[attr] * prod.qty;
+    else if (prod.frequency === "triMonth") triMonthly += +prod[attr] * prod.qty;
+    else if (prod.frequency === "year") yearly += +prod[attr] * prod.qty;
   });
-  if (time === "week") return weekly;
-  else if (time === "month") return weekly + monthly;
-  else if (time === "trimonth") return (weekly + monthly) * 3;
-  else if (time === "year") return (weekly + monthly) * 12;
+
+  if (time === "week") return +weekly.toFixed(2);
+  else if (time === "month") return +(weekly + monthly).toFixed(2);
+  else if (time === "triMonth") return +((weekly + monthly) * 3).toFixed(2);
+  else if (time === "year") return +((weekly + monthly) * 12).toFixed(2);
 };
 export const recalculatePriceTime = (price = 0, oldTime, newTime) => {
   let returnPrice = +price;
